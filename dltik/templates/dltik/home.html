@@ -1,0 +1,112 @@
+{% extends "dltik/base.html" %}
+{% load static %}
+{% block content %}
+<div class="text-center py-5">
+    <div class="bg-primary bg-opacity-10 border rounded p-4 shadow-sm">
+        <h1 class="mb-3 text-primary fw-bold">Tải video TikTok, YouTube, Facebook không logo miễn phí</h1>
+        <p class="lead text-dark mb-3">
+            Công cụ hỗ trợ tải video từ TikTok không watermark, tải video Facebook chất lượng cao, tải video YouTube nhanh chóng.
+            Hỗ trợ mọi thiết bị. Không cần đăng nhập.
+        </p>
+        <p class="mb-4 text-muted fst-italic small">
+            TikTok video downloader | Facebook video downloader | YouTube video downloader | No watermark | Free download tool
+        </p>
+
+        <div class="mx-auto position-relative" style="max-width: 850px;" id="input-container">
+            <!-- Input + Dán + Clear -->
+            <div class="input-group input-group-lg mb-3 border rounded overflow-hidden shadow-sm">
+                <input type="url"
+                       name="video_url"
+                       id="video-url-input"
+                       class="form-control border-0"
+                       placeholder="Dán liên kết video tại đây..."
+                       required>
+
+                <!-- Nút Dán (hiện mặc định) -->
+                <button type="button"
+                        class="btn btn-outline-primary border-0 border-start"
+                        id="paste-btn">
+                    <i class="bi bi-clipboard"></i> Dán
+                </button>
+
+                <!-- Nút Xoá (ẩn mặc định, sẽ show bằng JS) -->
+                <button type="button"
+                        class="btn btn-danger border-0 border-start d-none"
+                        id="clear-btn">
+                    <i class="bi bi-x-circle"></i> Xoá
+                </button>
+            </div>
+
+            <!-- Nút Tải -->
+            <div class="text-center">
+                <button type="button" class="btn btn-primary btn-lg shadow-sm px-5" id="download-btn">
+                    <i class="bi bi-download me-1"></i> Tải video
+                </button>
+            </div>
+        </div>
+        <div class="progress mt-3 d-none" style="height: 8px;" id="progress-wrapper">
+          <div class="progress-bar progress-bar-striped progress-bar-animated"
+               role="progressbar"
+               style="width: 0%;"
+               id="progress-bar"></div>
+        </div>
+
+    </div>
+
+    <!-- Kết quả -->
+    <div id="alert-container" class="mt-5"></div>
+
+    <div class="container d-none" id="preview-container">
+        <div class="d-flex flex-column flex-md-row align-items-start justify-content-between bg-light rounded p-3 shadow-sm mb-4">
+          <!-- Bên trái: thumbnail + title -->
+          <div class="d-flex align-items-start gap-3">
+            <img id="video-thumbnail" class="rounded" style="width: 120px; height: 120px; object-fit: cover;" alt="Thumbnail">
+            <div>
+              <h6 id="video-title" class="mb-1 fw-bold">Tiêu đề video</h6>
+              <small class="text-muted">TikTok | Facebook | YouTube</small>
+            </div>
+          </div>
+
+          <!-- Bên phải: nút tải -->
+            <div class="d-flex flex-column gap-2 mt-md-0 mt-3">
+                <div id="download-buttons">
+                <!-- JS gắn nút tại đây -->
+                </div>
+
+                <a href="" class="btn btn-success d-flex align-items-start justify-content-start gap-2">
+                    <i class="bi bi-plus-circle"></i>
+                    Tải video khác
+                </a>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Giới thiệu -->
+    <section class="mt-5 text-start" style="margin: auto;">
+        <h2 class="h5 fw-bold">DLHub là gì?</h2>
+        <p>
+            DLHub là nền tảng giúp bạn tải video TikTok không logo (no watermark), tải video Facebook và YouTube miễn phí.
+            Không cần tài khoản, không cần cài phần mềm. Chỉ cần dán liên kết, nhấn tải và tận hưởng.
+        </p>
+
+        <h3 class="h6 mt-4 fw-bold">Tính năng nổi bật:</h3>
+        <ul>
+            <li>Tải video TikTok không logo</li>
+            <li>Tải video YouTube, Facebook chất lượng cao</li>
+            <li>Tương thích với mọi thiết bị</li>
+            <li>Không cần đăng ký, không quảng cáo</li>
+        </ul>
+
+        <h3 class="h6 mt-4 fw-bold">Từ khóa được tìm nhiều:</h3>
+        <p class="small text-muted">
+            tải video tiktok hd, tải video facebook chất lượng cao, youtube downloader free, download tiktok không logo,
+            yt video downloader, download reels, tool tải video nhanh
+        </p>
+    </section>
+</div>
+{% endblock %}
+{% block extra_scripts %}
+<script src="{% static 'js/djs.js' %}?v2=1234"></script>
+<script src="https://cdn.jsdelivr.net/npm/linkifyjs@3.0.3/dist/linkify.min.js"></script>
+{% endblock %}
