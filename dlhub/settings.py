@@ -6,7 +6,7 @@ SECRET_KEY = 'django-insecure-*e+drp1##-#*#*@-2!^y!+%v4o3t13=oab46l385t899ahpx1l
 
 DEBUG = True
 
-ALLOWED_HOSTS = ['dlhub.nv', '127.0.0.1', 'localhost']
+ALLOWED_HOSTS = ['.dlhub.vn', '127.0.0.1', 'localhost']
 
 # Application definition
 
