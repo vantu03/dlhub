@@ -6,15 +6,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
     <!-- SEO -->
-    <title>{% block title %}DLHub - Tải video TikTok, YouTube, Facebook không logo{% endblock %}</title>
-    <meta name="description" content="{% block description %}Tải video nhanh chóng từ TikTok, Facebook, YouTube hoàn toàn miễn phí. Không logo, không watermark, không cần tài khoản!{% endblock %}" />
-    <meta name="keywords" content="{% block keywords %}tải video tiktok, youtube downloader, facebook video download, không logo, tải video nhanh{% endblock %}" />
+    <title>{% block title %}DLHub - Tải video TikTok, Facebook không logo{% endblock %}</title>
+    <meta name="description" content="{% block description %}Tải video nhanh chóng từ TikTok, Facebook hoàn toàn miễn phí. Không logo, không watermark, không cần tài khoản!{% endblock %}" />
+    <meta name="keywords" content="{% block keywords %}tải video tiktok, facebook video download, không logo, tải video nhanh{% endblock %}" />
     <meta name="author" content="DLHub Team" />
     <meta name="csrf-token" content="{{ csrf_token }}">
 
     <!-- Open Graph -->
-    <meta property="og:title" content="{% block og_title %}DLHub - Tải video TikTok, Facebook, YouTube không watermark{% endblock %}" />
-    <meta property="og:description" content="{% block og_description %}Dán link và tải video ngay lập tức. Hỗ trợ TikTok, YouTube, Facebook. Miễn phí, đơn giản, không logo.{% endblock %}" />
+    <meta property="og:title" content="{% block og_title %}DLHub - Tải video TikTok, Facebook không logo{% endblock %}" />
+    <meta property="og:description" content="{% block og_description %}Dán link và tải video ngay lập tức. Hỗ trợ TikTok, Facebook. Miễn phí, đơn giản, không logo.{% endblock %}" />
     <meta property="og:image" content="{% block og_image %}{% static 'images/preview.png' %}{% endblock %}" />
     <meta property="og:url" content="{% block og_url %}https://dlhub.com{% endblock %}" />
     <meta property="og:type" content="website" />
@@ -22,7 +22,7 @@
     <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="{% block twitter_title %}DLHub Downloader{% endblock %}" />
-    <meta name="twitter:description" content="{% block twitter_description %}Tải video TikTok, YouTube, Facebook không logo. Miễn phí và siêu nhanh.{% endblock %}" />
+    <meta name="twitter:description" content="{% block twitter_description %}Tải video TikTok, Facebook không logo. Miễn phí và siêu nhanh.{% endblock %}" />
     <meta name="twitter:image" content="{% block twitter_image %}{% static 'images/twitter-card.png' %}{% endblock %}" />
 
     <!-- Favicon -->
@@ -46,18 +46,10 @@
             <div>
                 <select class="form-select form-select-sm bg-dark text-white border-secondary" style="width: auto;" onchange="changeLang(this.value)">
                     <option value="vi" selected>Tiếng Việt</option>
-                    <option value="en">English</option>
                 </select>
             </div>
         </div>
     </header>
-
-    <script>
-        function changeLang(lang) {
-            // Thay đổi theo yêu cầu – ví dụ dùng URL param (?lang=vi) hoặc set cookie
-            window.location.href = `?lang=${lang}`;
-        }
-    </script>
 
 
     <!-- Main Content -->
@@ -69,11 +61,7 @@
     <footer class="bg-light text-center text-muted py-4 mt-5">
         <div class="container">
             <p class="mb-1">
-                &copy; {% now "Y" %} DLHub. Mọi quyền được bảo lưu.
-            </p>
-            <p class="mb-0 small">
-                Dựng bằng <a href="https://www.djangoproject.com/" class="text-muted">Django</a> và
-                <a href="https://getbootstrap.com/" class="text-muted">Bootstrap 5</a>.
+                &copy; {% now "Y" %} DLHub Version 1.4.
             </p>
         </div>
     </footer>

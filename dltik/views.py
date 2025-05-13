@@ -8,6 +8,9 @@ from django.http import StreamingHttpResponse
 
 SECRET_KEY = os.environ.get("SECRET_KEY", "dlhub_super_secret_dev_key")
 
+def custom_404_view(request, exception):
+    return render(request, 'dltik/404.html', status=404)
+
 def generate_token_view(request):
     try:
         body = json.loads(request.body)
