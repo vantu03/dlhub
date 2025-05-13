@@ -5,6 +5,7 @@ from django.shortcuts import render
 from .models import DownloadRecord
 from urllib.parse import urlparse, urlunparse
 from django.http import StreamingHttpResponse
+from django.conf import settings
 
 SECRET_KEY = os.environ.get("SECRET_KEY", "dlhub_super_secret_dev_key")
 
@@ -110,7 +111,7 @@ def downloadTiktok(data):
             try:
                 filename = f"dlhub_{uuid.uuid4()}_{label}"
                 with yt_dlp.YoutubeDL({
-                    'outtmpl': 'dltik/static/videos/' + filename + '.%(ext)s',
+                    'outtmpl': str(settings.BASE_DIR / 'media' / 'videos' / f'{filename}.%(ext)s'),
                     'format': fmt,
                     'quiet': True,
                     'noplaylist': True,
@@ -123,7 +124,7 @@ def downloadTiktok(data):
                     ext = info.get('ext', 'mp4')
                     data['thumbnail'] = info['thumbnail']
                     data['title'] = info['title']
-                    data['urls'].append({label: f"/static/videos/{filename}.{ext}"})
+                    data['urls'].append({label: f"/media/videos/{filename}.{ext}"})
             except Exception as e:
                 print(str(e))
 
