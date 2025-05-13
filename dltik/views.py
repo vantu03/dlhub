@@ -9,6 +9,9 @@ from django.conf import settings
 
 SECRET_KEY = os.environ.get("SECRET_KEY", "dlhub_super_secret_dev_key")
 
+def ads(request):
+    return render(request, 'dltik/ads.txt')
+
 def custom_404_view(request, exception):
     return render(request, 'dltik/404.html', status=404)
 
