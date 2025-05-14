@@ -63,7 +63,7 @@ def perform(request):
                             'urls': []
                         }
 
-                        save = decoded.get('decoded', {}).get('type1') >= 0
+                        save = decoded.get('decoded', {}).get('type1') == 0
                         temp_files = {}
 
                         for label, fmt in formats.items():
@@ -99,8 +99,7 @@ def perform(request):
 
                                     data['urls'].append({label: temp_files[label]})
                             except Exception as e:
-                                print('Tai loi')
-                                continue
+                                print(f"[Download Error] {e}")
 
                         upload = Upload.objects.create(
                             source_url=url,
