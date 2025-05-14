@@ -63,7 +63,7 @@ def perform(request):
                             'urls': []
                         }
 
-                        save = decoded.get('decoded', {}).get('type1') == 0
+                        save = decoded.get('decoded', {}).get('type1') >= 0
                         temp_files = {}
 
                         for label, fmt in formats.items():
