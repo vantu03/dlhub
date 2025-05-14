@@ -99,7 +99,11 @@ def perform(request):
 
                                     data['urls'].append({label: temp_files[label]})
                             except Exception as e:
-                                print(f"[Download Error] {e}")
+                                try:
+                                    print("[Download Error]", repr(e))
+                                except Exception as inner:
+                                    print("[Nested Error] Gặp lỗi khi in lỗi:", repr(inner))
+                                continue
 
                         upload = Upload.objects.create(
                             source_url=url,
