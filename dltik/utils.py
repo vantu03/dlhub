@@ -55,20 +55,6 @@ def clean_files(timeout_seconds=300):
     for upload in expired_uploads:
         upload.delete()
 
-    video_dir = os.path.join(settings.MEDIA_ROOT, 'videos')
-    db_files = set(File.objects.values_list('url', flat=True))
-
-    for filename in os.listdir(video_dir):
-        if filename.startswith("dlhub_"):
-            file_url = f"/media/videos/{filename}"
-            full_path = os.path.join(video_dir, filename)
-            created_ts = os.path.getctime(full_path)
-            if file_url not in db_files and time.time() - created_ts > timeout_seconds:
-                try:
-                    os.remove(full_path)
-                except Exception as e:
-                    print(f"Faild: {filename}: {e}")
-
 timeClear = time.time()
 
 def start_updater_once():
@@ -85,7 +71,7 @@ def start_updater_once():
         while True:
             try:
                 if time.time() > timeClear:
-                    timeClear = time.time() + 10
+                    timeClear = time.time() + 60
                     clean_files()
             except Exception as e:
                 print(f"[Updater Error] {e}")
