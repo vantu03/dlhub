@@ -123,7 +123,7 @@ def perform(request):
                     return response
 
         else:
-            print(decoded.get('msg'))
+            return JsonResponse({'error': 'Token lỗi'+ decoded.get('msg', '-1')}, status=400)
 
     return JsonResponse({'error': 'Thao tác không hợp lệ'}, status=400)
 
