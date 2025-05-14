@@ -1,13 +1,12 @@
-import uuid, yt_dlp, base64, json, hashlib, time, hmac, os, requests
-from urllib.parse import quote
 from django.http import JsonResponse
 from django.shortcuts import render
-from .models import DownloadRecord
-from urllib.parse import urlparse, urlunparse
-from django.http import StreamingHttpResponse
+from .models import Article, File, Upload
+from django.db.models import Q
+from dltik import utils
+from urllib.parse import quote
 from django.conf import settings
-
-SECRET_KEY = os.environ.get("SECRET_KEY", "dlhub_super_secret_dev_key")
+import uuid, json, yt_dlp, uuid, time, requests, urllib
+from django.http import StreamingHttpResponse
 
 def ads(request):
     return render(request, 'dltik/ads.txt')
@@ -21,226 +20,129 @@ def generate_token_view(request):
         url = body.get("url")
         type1 = body.get("type1", 0)
 
-        ts = int(time.time())
-        data = {"code": url, "type1": type1, "ts": ts}
-        data_str = json.dumps(data, separators=(',', ':'))
-        sig = hmac.new(SECRET_KEY.encode(), data_str.encode(), hashlib.sha256).hexdigest()
-        payload = {"data": data, "sig": sig}
-        token = base64.urlsafe_b64encode(json.dumps(payload).encode()).decode()
-
-        return JsonResponse({"token": token})
+        return JsonResponse({"token": utils.encode_token(data = {'type': 0, "code": url, "type1": type1})})
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=400)
 
 def home(request):
+    utils.start_updater_once()
     return render(request, 'dltik/home.html')
 
-def strip_query_params(url):
-    parsed = urlparse(url)
-    return urlunparse(parsed._replace(query="", fragment=""))
-
-def decodeUploadInfo(encoded_token):
-    try:
-        decoded_bytes = base64.urlsafe_b64decode(encoded_token)
-        payload = json.loads(decoded_bytes.decode("utf-8"))
-
-        data = payload['data']
-        sig = payload['sig']
-
-        # Verify chữ ký
-        data_str = json.dumps(data, separators=(',', ':'))
-        expected_sig = hmac.new(SECRET_KEY.encode(), data_str.encode(), hashlib.sha256).hexdigest()
-        if sig != expected_sig:
-            return {'error': 'Token bị giả mạo'}
-
-        # Kiểm tra hạn dùng 5 phút
-        now = int(time.time())
-        if abs(now - data.get('ts', 0)) > 300:
-            return {'error': 'Token hết hạn'}
-
-        return {'ok': True, 'decoded': data['code'], 'type1': data['type1']}
-
-    except Exception as e:
-        return {'error': str(e)}
-
-
-def dlv(request):
-    strToken = request.GET.get('token')
-    if strToken:
-        decoded = decodeUploadInfo(strToken)
-        if not decoded.get('error'):
-            match decoded.get('type1'):
+def perform(request):
+    str_token = request.GET.get('token')
+    if str_token:
+        decoded = utils.decode_token(str_token)
+        if decoded.get('ok'):
+            match decoded.get('decoded', {}).get('type'):
                 case 0:
-                    return downloadTiktok(decoded.get('decoded'))
+                    url = utils.strip_query_params(decoded.get('decoded', {}).get('code'))
+                    if url:
+                        # Check nếu đã tồn tại và chưa quá hạn
+                        uploaded = Upload.objects.filter(source_url=url).first()
+                        if uploaded:
+                            if time.time() - uploaded.created_at.timestamp() > 300:
+                                uploaded.delete()
+                            else:
+                                return JsonResponse({'success': True, 'data': {
+                                    'thumbnail': uploaded.thumbnail,
+                                    'urls': [
+                                        {f.label: f.url}
+                                        for f in uploaded.files.all()
+                                    ],
+                                    'title': uploaded.title,
+                                }})
+
+                        formats = {
+                            'Download <i class="bi bi-badge-hd-fill"></i>': 'best',
+                            'Download': 'best[height<=1080]',
+                        }
+
+                        data = {
+                            'thumbnail': None,
+                            'title': None,
+                            'urls': []
+                        }
+
+                        save = decoded.get('decoded', {}).get('type1') == 0
+                        temp_files = {}
+
+                        for label, fmt in formats.items():
+                            try:
+                                filename = f"dlhub_{uuid.uuid4()}"
+                                filepath = str(settings.BASE_DIR / 'media' / 'videos' / f'{filename}')
+
+                                with yt_dlp.YoutubeDL({
+                                    'outtmpl': f'{filepath}.%(ext)s',
+                                    'format': fmt,
+                                    'quiet': True,
+                                    'noplaylist': True,
+                                    'http_headers': {
+                                        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
+                                        'Accept-Language': 'en-US,en;q=0.9',
+                                    }
+                                }) as ydl:
+                                    info = ydl.extract_info(url, download=save)
+                                    ext = info.get('ext', 'mp4')
+                                    data['thumbnail'] = info['thumbnail']
+                                    data['title'] = info['title']
+
+                                    if save:
+                                        temp_files[label] = f"/media/videos/{filename}.{ext}"
+                                    else:
+                                        token = utils.encode_token(
+                                            data={"code": quote(info['url'], safe=''), "type": 1, "filename": f"{filename}.{ext}"},
+                                            ts=-1
+                                        )
+                                        temp_files[label] = f"/perform?token={token}"
+
+                                    data['urls'].append({label: temp_files[label]})
+                            except Exception as e:
+                                print(str(e))
+
+                        upload = Upload.objects.create(
+                            source_url=url,
+                            title=data['title'],
+                            thumbnail=data['thumbnail'],
+                        )
+                        for label, url in temp_files.items():
+                            File.objects.create(
+                                upload=upload,
+                                label=label,
+                                url=url
+                            )
+
+                        return JsonResponse({'success': True, 'data': data})
+
                 case 1:
-                    return downloadYoutube(decoded.get('decoded'))
-                case 2:
-                    return downloadFacebook(decoded.get('decoded'))
+                    video_url = decoded.get('decoded', {}).get('code')
+                    filename = decoded.get('decoded', {}).get('filename')
+
+                    r = requests.get(urllib.parse.unquote(video_url), stream=True)
+                    response = StreamingHttpResponse(r.iter_content(1024), content_type=r.headers['Content-Type'])
+                    response['Content-Disposition'] = f'attachment; filename="{filename}"'
+                    return response
+
+        else:
+            print(decoded.get('msg'))
 
     return JsonResponse({'error': 'Thao tác không hợp lệ'}, status=400)
 
-def proxy_download(request):
-    video_url = request.GET.get("url")
-    r = requests.get(video_url, stream=True)
-    response = StreamingHttpResponse(r.iter_content(1024), content_type=r.headers['Content-Type'])
-    response['Content-Disposition'] = f'attachment; filename="video.mp4"'
-    return response
+def articles(request, tag = None):
+    articles = Article.objects.filter(is_published=True)
+    if tag:
+        articles = articles.filter(Q(tags__icontains=tag)).distinct()
+    return render(request, 'dltik/articles.html', {'articles': articles, 'tag': tag})
 
+def article(request, slug):
+    article = Article.objects.filter(slug=slug).first()
+    if article:
+        return render(request, 'dltik/article.html', {'article': article})
+    else:
+        return custom_404_view(request, None)
 
-def downloadTiktok(data):
-    url = strip_query_params(data)
-    if url:
+def about(request):
+    return render(request, 'dltik/about.html')
 
-        fileRecord = DownloadRecord.objects.filter(url=url).first()
-        if fileRecord:
-            return JsonResponse({'success': True, 'data': {
-                'thumbnail': fileRecord.thumbnail,
-                'urls': fileRecord.urls,
-                'title': fileRecord.title,
-            }})
+def contact(request):
+    return render(request, 'dltik/contact.html')
 
-        formats = {
-            'HD': 'best',
-            '720p': 'best[height<=720]',
-        }
-
-        data = {
-            'thumbnail': None,
-            'title': None,
-            'urls': []
-        }
-
-        for label, fmt in formats.items():
-            try:
-                filename = f"dlhub_{uuid.uuid4()}_{label}"
-                with yt_dlp.YoutubeDL({
-                    'outtmpl': str(settings.BASE_DIR / 'media' / 'videos' / f'{filename}.%(ext)s'),
-                    'format': fmt,
-                    'quiet': True,
-                    'noplaylist': True,
-                    'http_headers': {
-                        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-                        'Accept-Language': 'en-US,en;q=0.9',
-                    }
-                }) as ydl:
-                    info = ydl.extract_info(url, download=True)
-                    ext = info.get('ext', 'mp4')
-                    data['thumbnail'] = info['thumbnail']
-                    data['title'] = info['title']
-                    data['urls'].append({label: f"/media/videos/{filename}.{ext}"})
-            except Exception as e:
-                print(str(e))
-
-        DownloadRecord.objects.create(
-            url=url,
-            urls=data['urls'],
-            thumbnail=data['thumbnail'],
-            title=data['title'],
-        )
-        return JsonResponse({'success': True, 'data': data})
-
-    return JsonResponse({'error' : 'Thao tác không hợp lệ'}, status=400)
-
-def downloadYoutube(data):
-    url = strip_query_params(data)
-    if url:
-
-        fileRecord = DownloadRecord.objects.filter(url=url).first()
-        if fileRecord:
-            return JsonResponse({'success': True, 'data': {
-                'thumbnail': fileRecord.thumbnail,
-                'urls': fileRecord.urls,
-                'title': fileRecord.title,
-            }})
-
-        formats = {
-            'HD': 'best',
-            '720p': 'best[height<=720]',
-        }
-
-        data = {
-            'thumbnail': None,
-            'title': None,
-            'urls': []
-        }
-
-        for label, fmt in formats.items():
-            try:
-                with yt_dlp.YoutubeDL({
-                    'format': fmt,
-                    'quiet': True,
-                    'noplaylist': True,
-                    'http_headers': {
-                        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-                        'Accept-Language': 'en-US,en;q=0.9',
-                    }
-                }) as ydl:
-                    info = ydl.extract_info(url, download=False)
-                    ext = info.get('ext', 'mp4')
-                    data['thumbnail'] = info['thumbnail']
-                    data['title'] = info['title']
-                    data['urls'].append({label: f"/proxy-download?url={quote(info['url'], safe='')}"})
-            except Exception as e:
-                print(str(e))
-
-        DownloadRecord.objects.create(
-            url=url,
-            urls=data['urls'],
-            thumbnail=data['thumbnail'],
-            title=data['title'],
-        )
-        return JsonResponse({'success': True, 'data': data})
-
-    return JsonResponse({'error' : 'Thao tác không hợp lệ'}, status=400)
-
-def downloadFacebook(data):
-    url = strip_query_params(data)
-    if url:
-
-        fileRecord = DownloadRecord.objects.filter(url=url).first()
-        if fileRecord:
-            return JsonResponse({'success': True, 'data': {
-                'thumbnail': fileRecord.thumbnail,
-                'urls': fileRecord.urls,
-                'title': fileRecord.title,
-            }})
-
-        formats = {
-            'HD': 'best',
-            '720p': 'best[height<=720]',
-        }
-
-        data = {
-            'thumbnail': None,
-            'title': None,
-            'urls': []
-        }
-
-        for label, fmt in formats.items():
-            try:
-                with yt_dlp.YoutubeDL({
-                    'format': fmt,
-                    'quiet': True,
-                    'noplaylist': True,
-                    'http_headers': {
-                        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-                        'Accept-Language': 'en-US,en;q=0.9',
-                    }
-                }) as ydl:
-                    info = ydl.extract_info(url, download=False)
-                    ext = info.get('ext', 'mp4')
-                    data['thumbnail'] = info['thumbnail']
-                    data['title'] = info['title']
-                    data['urls'].append({label: f"/proxy-download?url={quote(info['url'], safe='')}"})
-            except Exception as e:
-                print(str(e))
-
-        DownloadRecord.objects.create(
-            url=url,
-            urls=data['urls'],
-            thumbnail=data['thumbnail'],
-            title=data['title'],
-        )
-        return JsonResponse({'success': True, 'data': data})
-
-    return JsonResponse({'error' : 'Thao tác không hợp lệ'}, status=400)

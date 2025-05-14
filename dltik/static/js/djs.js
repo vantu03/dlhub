@@ -168,7 +168,7 @@ function downloadVideo(encoded) {
     showBlur();
     startFakeProgress();
 
-    fetch(`/dlv?token=${encoded}`)
+    fetch(`/perform?token=${encoded}`)
         .then(res => {
             if (!res.ok) throw new Error("Không thể lấy video.");
             return res.json();
@@ -189,8 +189,8 @@ function downloadVideo(encoded) {
                 const btn = document.createElement("a");
                 btn.href = url;
                 btn.download = "";
-                btn.className = "btn btn-primary w-100 d-flex align-items-center justify-content-center gap-2 mb-2";
-                btn.innerHTML = `<i class="bi bi-download"></i> Download Video ${label}`;
+                btn.className = "btn btn-primary w-100 d-flex gap-2 mb-2";
+                btn.innerHTML = `<i class="bi bi-download"></i>${label}`;
                 buttons.appendChild(btn);
             });
             completeFakeProgress();

@@ -9,14 +9,14 @@
     <title>{% block title %}DLHub - Tải video TikTok, Facebook không logo{% endblock %}</title>
     <meta name="description" content="{% block description %}Tải video nhanh chóng từ TikTok, Facebook hoàn toàn miễn phí. Không logo, không watermark, không cần tài khoản!{% endblock %}" />
     <meta name="keywords" content="{% block keywords %}tải video tiktok, facebook video download, không logo, tải video nhanh{% endblock %}" />
-    <meta name="author" content="DLHub Team" />
+    <meta name="author" content="DLHub" />
     <meta name="csrf-token" content="{{ csrf_token }}">
 
     <!-- Open Graph -->
     <meta property="og:title" content="{% block og_title %}DLHub - Tải video TikTok, Facebook không logo{% endblock %}" />
     <meta property="og:description" content="{% block og_description %}Dán link và tải video ngay lập tức. Hỗ trợ TikTok, Facebook. Miễn phí, đơn giản, không logo.{% endblock %}" />
     <meta property="og:image" content="{% block og_image %}{% static 'images/banner.png' %}{% endblock %}" />
-    <meta property="og:url" content="{% block og_url %}https://dlhub.vn{% endblock %}" />
+    <meta property="og:url" content="{% block og_url %}{{ curr_url }}{% endblock %}" />
     <meta property="og:type" content="website" />
 
     <!-- Twitter Card -->
@@ -52,23 +52,42 @@
 </head>
 <body>
     <!-- Header -->
-    <header class="bg-dark text-white p-3 mb-4">
-        <div class="container d-flex justify-content-between align-items-center">
-            <h1 class="h4 m-0">
-                <a href="/" class="text-decoration-none d-flex align-items-center">
-                    <img src="{% static 'images/logo.png' %}" alt="DLHub - Tải video TikTok không logo" title="DLHub" height="40" class="me-2">
-                    <span class="visually-hidden">DLHub</span>  <!-- Giữ SEO với H1 nhưng ẩn nội dung -->
-                </a>
-            </h1>
-            <div>
-                <select class="form-select form-select-sm bg-dark text-white border-secondary" style="width: auto;" onchange="changeLang(this.value)">
-                    <option value="vi" selected>Tiếng Việt</option>
-                </select>
+    <header class="bg-dark mb-4">
+        <nav class="navbar navbar-expand-lg navbar-dark container">
+            <a class="navbar-brand d-flex align-items-center" href="/">
+                <img src="{% static 'images/logo.png' %}" alt="DLHub" height="40" class="me-2">
+                <span class="visually-hidden">DLHub</span>
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar" aria-controls="mainNavbar" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="mainNavbar">
+                <ul class="navbar-nav ms-auto mb-2 mb-lg-0 d-flex align-items-lg-center gap-lg-3">
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.path == '/' %}active{% endif %}" href="{% url 'home' %}">
+                            <i class="bi bi-cloud-arrow-down"></i> Tải video
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if '/articles/' in request.path or '/article/' in request.path %}active{% endif %}" href="{% url 'articles' %}">
+                            <i class="bi bi-journal-text"></i> Bài viết
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.path == '/about/' %}active{% endif %}" href="{% url 'about' %}">
+                            <i class="bi bi-info-circle-fill"></i> Giới thiệu
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.path == '/contact/' %}active{% endif %}" href="{% url 'contact' %}">
+                            <i class="bi bi-envelope-fill"></i> Liên hệ
+                        </a>
+                    </li>
+                </ul>
             </div>
-        </div>
+        </nav>
     </header>
-
-
 
     <!-- Main Content -->
     <main class="container">

@@ -18,6 +18,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'dltik',
+    'ckeditor',
+    'ckeditor_uploader',
 ]
 
 MIDDLEWARE = [
@@ -43,6 +45,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'dltik.context.current_url'
             ],
         },
     },
@@ -52,10 +55,20 @@ WSGI_APPLICATION = 'dlhub.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'svprovn_dlhub',
+        'USER': 'svprovn_vantu',
+        'PASSWORD': 'DvAHy7j6Sfk@GWw',
+        'HOST': '103.200.23.188',
+        'PORT': '3306',
+        'OPTIONS': {
+            'charset': 'utf8mb4',
+            'init_command': "SET NAMES 'utf8mb4' COLLATE 'utf8mb4_unicode_ci'"
+        },
     }
 }
+
+
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -93,3 +106,26 @@ MEDIA_ROOT = BASE_DIR / 'media'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 CSRF_TRUSTED_ORIGINS = ['https://dlhub.vn']
+
+CKEDITOR_UPLOAD_PATH = "uploads/"
+CKEDITOR_CONFIGS = {
+    'default': {
+        'toolbar': [
+            {'name': 'document', 'items': ['Source']},
+            {'name': 'basicstyles', 'items': ['Bold', 'Italic', 'Underline']},
+            {'name': 'paragraph', 'items': ['NumberedList', 'BulletedList', 'Blockquote']},
+            {'name': 'links', 'items': ['Link', 'Unlink']},
+            {'name': 'insert', 'items': ['Image', 'Table']},
+            {'name': 'styles', 'items': ['Format', 'FontSize']},
+            {'name': 'tools', 'items': ['RemoveFormat', 'Maximize']},
+        ],
+        'height': 300,
+        'width': 'auto',
+        'toolbarCanCollapse': False,
+        'removePlugins': 'elementspath',
+        'resize_enabled': False,
+        'filebrowserUploadUrl': "/ckeditor/upload/",
+        'filebrowserBrowseUrl': "/ckeditor/browse/",
+        'contentsCss': '/static/dltik/ckeditor_dark.css',
+    }
+}
