@@ -62,7 +62,8 @@ def clean_files(timeout_seconds=300):
         if filename.startswith("dlhub_"):
             file_url = f"/media/videos/{filename}"
             full_path = os.path.join(video_dir, filename)
-            if file_url not in db_files:
+            created_ts = os.path.getctime(full_path)
+            if file_url not in db_files and time.time() - created_ts > timeout_seconds:
                 try:
                     os.remove(full_path)
                 except Exception as e:
