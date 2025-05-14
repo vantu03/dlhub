@@ -76,6 +76,8 @@ def perform(request):
                                     'format': fmt,
                                     'quiet': True,
                                     'noplaylist': True,
+                                    'continuedl': False,
+                                    'nopart': True,
                                     'http_headers': {
                                         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
                                         'Accept-Language': 'en-US,en;q=0.9',
@@ -97,7 +99,7 @@ def perform(request):
 
                                     data['urls'].append({label: temp_files[label]})
                             except Exception as e:
-                                print(str(e))
+                                print(f"[Download Error] {e}")
 
                         upload = Upload.objects.create(
                             source_url=url,
