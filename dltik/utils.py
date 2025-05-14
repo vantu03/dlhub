@@ -12,7 +12,9 @@ _updater_started = False
 SECRET_KEY = os.environ.get("SECRET_KEY", "dlhub_super_secret_dev_key")
 DELAY_UPDATE = 1
 
-def encode_token(data, ts = int(time.time()) + 300) -> str:
+def encode_token(data, ts=None) -> str:
+    if ts is None:
+        ts = int(time.time()) + 300
     data_str = json.dumps(data, separators=(',', ':'))
     sig = hmac.new(SECRET_KEY.encode(), data_str.encode(), hashlib.sha256).hexdigest()
     payload = {"data": data, "ts": ts, "sig": sig}
