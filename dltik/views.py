@@ -125,7 +125,7 @@ def perform(request):
         else:
             return JsonResponse({'error': 'Token lỗi'+ decoded.get('msg', '-1')}, status=400)
 
-    return JsonResponse({'error': 'Thao tác không hợp lệ'}, status=400)
+    return JsonResponse({'error': 'Thao tác không hợp lệ'+ str_token}, status=400)
 
 def articles(request, tag = None):
     articles = Article.objects.filter(is_published=True)
