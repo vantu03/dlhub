@@ -130,6 +130,9 @@ def start_updater_once():
     def loop():
         while True:
             try:
+                from django.db import connection
+
+                connection.close_if_unusable_or_obsolete()
                 clean_expired_data()
             except Exception as e:
                 print(f"[Updater Error] {e}")
