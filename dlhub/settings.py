@@ -20,6 +20,7 @@ INSTALLED_APPS = [
     'dltik',
     'ckeditor',
     'ckeditor_uploader',
+    'django.contrib.sitemaps',
 ]
 
 MIDDLEWARE = [
@@ -118,13 +119,17 @@ CKEDITOR_CONFIGS = {
             {'name': 'styles', 'items': ['Format', 'FontSize']},
             {'name': 'tools', 'items': ['RemoveFormat', 'Maximize']},
         ],
-        'height': 300,
+        'height': 400,
         'width': 'auto',
         'toolbarCanCollapse': False,
         'removePlugins': 'elementspath',
         'resize_enabled': False,
         'filebrowserUploadUrl': "/ckeditor/upload/",
         'filebrowserBrowseUrl': "/ckeditor/browse/",
-        'contentsCss': '/static/dltik/ckeditor_dark.css',
+        'contentsCss': [
+            'https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css',
+            '/static/css/ckeditor_dark.css',
+        ],
+        'allowedContent': True,
     }
 }

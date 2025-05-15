@@ -3,6 +3,7 @@ from django.contrib.auth.models import User
 from django.utils.text import slugify
 from django.utils import timezone
 from ckeditor.fields import RichTextField
+from django.urls import reverse
 
 class Upload(models.Model):
     source_url = models.URLField()
@@ -69,3 +70,18 @@ class Article(models.Model):
 
     def get_tags(self):
         return [tag.strip() for tag in self.tags.split(',') if tag.strip()]
+
+    def get_absolute_url(self):
+        return reverse('article', kwargs={'slug': self.slug})
+
+class PinnedArticle(models.Model):
+    article = models.OneToOneField(Article, on_delete=models.CASCADE, related_name='pinned')
+    pinned_at = models.DateTimeField(auto_now_add=True)
+    order = models.PositiveIntegerField(default=0, help_text="Order of precedence. Smaller numbers will appear first.")
+    note = models.CharField(max_length=255, blank=True, help_text="Internal notes if needed.")
+
+    class Meta:
+        ordering = ['order', '-pinned_at']
+
+    def __str__(self):
+        return f"Ghim: {self.article.title}"

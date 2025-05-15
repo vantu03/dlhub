@@ -1,5 +1,7 @@
 from django.urls import path
 from . import views
+from django.contrib.sitemaps.views import sitemap
+
 
 urlpatterns = [
     path('', views.home, name='home'),
@@ -11,5 +13,7 @@ urlpatterns = [
     path('contact/', views.contact, name='contact'),
     path('article/<slug:slug>/', views.article, name='article'),
     path('articles/tag/<str:tag>/', views.articles, name='tagged_articles'),
+    path('sitemap.xml', sitemap, {'sitemaps': {'static': views.StaticViewSitemap, 'articles': views.ArticleSitemap, }}, name='sitemap'),
+    path("robots.txt", views.robots_txt, name="robots_txt"),
 ]
 

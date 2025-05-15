@@ -1,11 +1,13 @@
 from django.http import JsonResponse
 from django.shortcuts import render
-from .models import Article, File, Upload
+from .models import Article, File, Upload, PinnedArticle
 from django.db.models import Q
 from dltik import utils
 from urllib.parse import quote
 import json, time, requests, urllib, threading
-from django.http import StreamingHttpResponse
+from django.http import StreamingHttpResponse, HttpResponse
+from django.contrib.sitemaps import Sitemap
+from django.urls import reverse
 
 def ads(request):
     return render(request, 'dltik/ads.txt')
@@ -24,8 +26,9 @@ def generate_token_view(request):
         return JsonResponse({"error": str(e)}, status=400)
 
 def home(request):
+    pinned_articles = PinnedArticle.objects.select_related('article')[:5]
     utils.start_updater_once()
-    return render(request, 'dltik/home.html')
+    return render(request, 'dltik/home.html', {'pinned_articles': pinned_articles})
 
 def perform(request):
     str_token = request.GET.get('token')
@@ -116,3 +119,33 @@ def about(request):
 def contact(request):
     return render(request, 'dltik/contact.html')
 
+class StaticViewSitemap(Sitemap):
+    priority = 0.8
+    changefreq = 'monthly'
+
+    def items(self):
+        return ['home', 'articles', 'contact', 'about']
+
+    def location(self, item):
+        return reverse(item)
+
+class ArticleSitemap(Sitemap):
+    changefreq = "weekly"
+    priority = 0.9
+
+    def items(self):
+        return Article.objects.filter(is_published=True)
+
+    def lastmod(self, obj):
+        return obj.published_at
+
+def robots_txt(request):
+    host = request.get_host()
+    sitemap_url = f"https://{host}/sitemap.xml"
+    lines = [
+        "User-agent: *",
+        "Disallow: /admin/",
+        "Allow: /",
+        f"Sitemap: {sitemap_url}",
+    ]
+    return HttpResponse("\n".join(lines), content_type="text/plain")
