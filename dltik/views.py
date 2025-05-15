@@ -4,8 +4,7 @@ from .models import Article, File, Upload
 from django.db.models import Q
 from dltik import utils
 from urllib.parse import quote
-from django.conf import settings
-import uuid, json, yt_dlp, uuid, time, requests, urllib
+import json, time, requests, urllib, threading
 from django.http import StreamingHttpResponse
 
 def ads(request):
@@ -53,65 +52,34 @@ def perform(request):
                                 }})
 
                         formats = {
-                            'Download <i class="bi bi-badge-hd-fill"></i>': 'best',
                             'Download': 'best[height<=1080]',
+                            'Download <i class="bi bi-badge-hd-fill"></i>': 'best',
                         }
 
-                        data = {
-                            'thumbnail': None,
-                            'title': None,
-                            'urls': []
-                        }
-
+                        data = {'thumbnail': '', 'title': '', 'urls': []}
                         save = decoded.get('decoded', {}).get('type1') == 0
                         temp_files = {}
+                        threads = []
+                        data_lock = threading.Lock()
 
                         for label, fmt in formats.items():
-                            try:
-                                filename = f"dlhub_{uuid.uuid4()}"
-                                filepath = str(settings.BASE_DIR / 'media' / 'videos' / f'{filename}')
+                            t = threading.Thread(target=utils.download_format,
+                                                 args=(label, fmt, url, save, temp_files, data_lock, data))
+                            t.start()
+                            threads.append(t)
 
-                                with yt_dlp.YoutubeDL({
-                                    'outtmpl': f'{filepath}.%(ext)s',
-                                    'format': fmt,
-                                    'quiet': True,
-                                    'noplaylist': True,
-                                    'continuedl': False,
-                                    'nopart': True,
-                                    'http_headers': {
-                                        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
-                                        'Accept-Language': 'en-US,en;q=0.9',
-                                    }
-                                }) as ydl:
-                                    info = ydl.extract_info(url, download=save)
-                                    ext = info.get('ext', 'mp4')
-                                    data['thumbnail'] = info['thumbnail']
-                                    data['title'] = info['title']
+                        # Chờ các thread tải xong
+                        for t in threads:
+                            t.join()
 
-                                    if save:
-                                        temp_files[label] = f"/media/videos/{filename}.{ext}"
-                                    else:
-                                        token = utils.encode_token(
-                                            data={"code": quote(info['url'], safe=''), "type": 1, "filename": f"{filename}.{ext}"},
-                                            ts=-1
-                                        )
-                                        temp_files[label] = f"/perform?token={token}"
-
-                                    data['urls'].append({label: temp_files[label]})
-                            except Exception as e:
-                                print(f"[Download Error] {e}")
-
+                        # Sau khi tất cả hoàn tất thì lưu DB
                         upload = Upload.objects.create(
                             source_url=url,
                             title=data['title'],
                             thumbnail=data['thumbnail'],
                         )
-                        for label, url in temp_files.items():
-                            File.objects.create(
-                                upload=upload,
-                                label=label,
-                                url=url
-                            )
+                        for label, url_path in temp_files.items():
+                            File.objects.create(upload=upload, label=label, url=url_path)
 
                         return JsonResponse({'success': True, 'data': data})
 

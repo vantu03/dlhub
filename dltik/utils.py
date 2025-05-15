@@ -4,7 +4,6 @@ import threading
 import time
 import os
 from django.utils import timezone
-from django.conf import settings
 from dltik.models import Upload, File
 
 _updater_started = False
@@ -46,6 +45,55 @@ def decode_token(encoded_token):
 
     except Exception as e:
         return {'error': 3, 'msg': str(e)}
+
+import threading, uuid, yt_dlp
+from urllib.parse import quote
+from django.conf import settings
+
+def download_format(label, fmt, url, save, temp_files, data_lock, data):
+    try:
+        filename = f"dlhub_{uuid.uuid4()}"
+        filepath = str(settings.BASE_DIR / 'media' / 'videos' / f'{filename}')
+        with yt_dlp.YoutubeDL({
+            'outtmpl': f'{filepath}.%(ext)s',
+            'format': fmt,
+            'quiet': True,
+            'noplaylist': True,
+            'continuedl': False,
+            'http_headers': {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
+                'Accept-Language': 'en-US,en;q=0.9',
+            }
+        }) as ydl:
+            print(f"bat dau tai {fmt}")
+            info = ydl.extract_info(url, download=save)
+            ext = info.get('ext', 'mp4')
+
+            # Thread-safe update
+            with data_lock:
+                if not data['thumbnail']:
+                    data['thumbnail'] = info.get('thumbnail', '')
+                if not data['title']:
+                    data['title'] = info.get('title', '')
+
+            if save:
+                path = f"/media/videos/{filename}.{ext}"
+            else:
+                token = encode_token(
+                    data={"code": quote(info['url'], safe=''), "type": 1, "filename": f"{filename}.{ext}"},
+                    ts=-1
+                )
+                path = f"/perform?token={token}"
+
+            with data_lock:
+                data['urls'].append({label: path})
+                temp_files[label] = path
+        print(f"tai xong {fmt}")
+
+    except Exception as e:
+        print(f"[Download Thread Error] {label}: {e}")
+
+
 
 def clean_files(timeout_seconds=300):
     print('starting to clean up...')

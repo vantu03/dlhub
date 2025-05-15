@@ -112,9 +112,21 @@
         </div>
 
     </section>
+    <section class="mt-5 text-start">
+      <div class="bg-white p-4 rounded shadow-sm">
+        <h2 class="h5 fw-bold">Cắt Ảnh TikTok - Chia Ảnh Đẹp Theo Tỉ Lệ</h2>
+        <p>
+          <strong>Công cụ cắt ảnh TikTok</strong> cho phép bạn chia ảnh đẹp theo tỉ lệ khung hình chuẩn để đăng lên TikTok, Instagram, giúp ảnh không bị cắt lệch hoặc mờ. Hỗ trợ cắt theo nhiều phần, điều chỉnh vị trí dễ dàng và không cần cài app.
+        </p>
+        <a href="{% url 'article' slug='crop' %}" class="btn btn-outline-primary fw-bold mt-2" title="Cắt ảnh TikTok không bị cắt lệch, đúng tỉ lệ đăng mạng xã hội">
+          <i class="bi bi-scissors"></i>Dùng công cụ Cắt Ảnh TikTok
+        </a>
+      </div>
+    </section>
+
 </div>
 {% endblock %}
 {% block extra_scripts %}
-<script src="{% static 'js/djs.js' %}?v2=1234"></script>
+<script src="{% static 'js/djs.js' %}?v2=12345"></script>
 <script src="https://cdn.jsdelivr.net/npm/linkifyjs@3.0.3/dist/linkify.min.js"></script>
 {% endblock %}

@@ -99,6 +99,14 @@ document.getElementById("download-btn").addEventListener("click", function () {
                         .then(token => downloadVideo(token))
                         .catch(err => showMessage("danger", err.message));
                     break;
+                case "douyin.com":
+                case "www.douyin.com":
+                case "v.douyin.com":
+                    encodeDownloadInfo(rawUrl, 0)
+                        .then(token => downloadVideo(token))
+                        .catch(err => showMessage("danger", err.message));
+                    break;
+
 
                 default:
                     showMessage("warning", "Không hỗ trợ trang: " + host);
