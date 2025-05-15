@@ -26,6 +26,16 @@
                 {% endif %}
             </p>
         </header>
+        {% if article.show_toc %}
+            <div id="toc" class="mb-4 p-3 border rounded bg-light position-relative">
+              <button id="toggle-toc" class="btn btn-sm btn-outline-secondary position-absolute top-0 end-0 m-2" type="button">
+                <i class="bi bi-chevron-up"></i>
+              </button>
+              <strong class="mb-2 d-block text-primary">Mục lục bài viết</strong>
+              <ul id="toc-list" class="list-unstyled ps-3 mb-0"></ul>
+            </div>
+
+        {% endif %}
 
         <div class="article-body mb-4">
             {{ article.content|safe }}
@@ -43,4 +53,45 @@
         {% endif %}
     </article>
 </div>
+{% endblock %}
+{% block extra_scripts %}
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        const content = document.querySelector(".article-body");
+        const tocList = document.getElementById("toc-list");
+        const toggleBtn = document.getElementById("toggle-toc");
+        const toc = document.getElementById("toc");
+
+        if (!content || !tocList || !toggleBtn) return;
+
+        // Tạo TOC
+        const headings = content.querySelectorAll("h2, h3, h4, h5");
+        let counter = 1;
+        headings.forEach(heading => {
+          const tagName = heading.tagName.toLowerCase();
+          const id = heading.id || `section-${counter++}`;
+          heading.id = id;
+
+          const li = document.createElement("li");
+          li.className = tagName === "h3" ? "ms-3" : "";
+
+          const a = document.createElement("a");
+          a.href = `#${id}`;
+          a.textContent = heading.textContent;
+          a.className = "text-decoration-none";
+
+          li.appendChild(a);
+          tocList.appendChild(li);
+        });
+
+        // Nút thu gọn/mở rộng
+        toggleBtn.addEventListener("click", () => {
+          tocList.classList.toggle("d-none");
+          const icon = toggleBtn.querySelector("i");
+          icon.classList.toggle("bi-chevron-up");
+          icon.classList.toggle("bi-chevron-down");
+        });
+      });
+    </script>
+
 {% endblock %}

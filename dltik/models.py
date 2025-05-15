@@ -52,6 +52,7 @@ class Article(models.Model):
     summary = models.CharField(max_length=255, blank=True)
     content = RichTextField()
     cover_image = models.URLField(blank=True, null=True)
+    show_toc = models.BooleanField(default=True, help_text="Show list automatically if there is title?")
     published_at = models.DateTimeField(default=timezone.now)
     is_published = models.BooleanField(default=True)
     author = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='articles')
