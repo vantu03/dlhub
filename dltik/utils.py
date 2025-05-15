@@ -9,7 +9,7 @@ from dltik.models import Upload, File
 _updater_started = False
 
 SECRET_KEY = os.environ.get("SECRET_KEY", "dlhub_super_secret_dev_key")
-DELAY_UPDATE = 1
+DELAY_UPDATE = 60
 
 def encode_token(data, ts=None) -> str:
     if ts is None:
@@ -93,17 +93,30 @@ def download_format(label, fmt, url, save, temp_files, data_lock, data):
     except Exception as e:
         print(f"[Download Thread Error] {label}: {e}")
 
-
-
-def clean_files(timeout_seconds=300):
-    print('starting to clean up...')
-
+def clean_expired_data(timeout_seconds=300):
+    print('[Cleanup] Bắt đầu dọn dữ liệu quá hạn...')
+    # Xóa bản ghi Upload cũ
     now = timezone.now()
     expired_uploads = Upload.objects.filter(created_at__lt=now - timezone.timedelta(seconds=timeout_seconds))
     for upload in expired_uploads:
         upload.delete()
 
-timeClear = time.time()
+    # Xóa file dlhub_ cũ
+    media_path = os.path.join(settings.BASE_DIR, 'media', 'videos')
+    if not os.path.exists(media_path):
+        return
+    now_ts = time.time()
+    for filename in os.listdir(media_path):
+        if filename.startswith('dlhub_'):
+            full_path = os.path.join(media_path, filename)
+            try:
+                if os.path.isfile(full_path):
+                    created = os.path.getctime(full_path)
+                    if now_ts - created > timeout_seconds:
+                        os.remove(full_path)
+                        print(f"Deleted: {full_path}")
+            except Exception as e:
+                print(f"Error deleting {full_path}: {e}")
 
 def start_updater_once():
     global _updater_started
@@ -115,12 +128,9 @@ def start_updater_once():
     import time
 
     def loop():
-        global timeClear
         while True:
             try:
-                if time.time() > timeClear:
-                    timeClear = time.time() + 60
-                    clean_files()
+                clean_expired_data()
             except Exception as e:
                 print(f"[Updater Error] {e}")
             time.sleep(DELAY_UPDATE)
