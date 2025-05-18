@@ -77,23 +77,6 @@
 
           const a = document.createElement("a");
           a.href = `#${id}`;
-            a.addEventListener("click", function (e) {
-              e.preventDefault();
-            
-              location.hash = id;
-
-              setTimeout(() => {
-                const target = document.getElementById(id);
-                if (target) {
-                  target.classList.add("highlight-heading");
-                  setTimeout(() => {
-                    target.classList.remove("highlight-heading");
-                  }, 600);
-                }
-              }, 10);
-            });
-
-
           a.textContent = heading.textContent;
           a.className = "text-decoration-none";
 
@@ -110,25 +93,5 @@
         });
       });
     </script>
-    <style>
-      .highlight-heading {
-        animation: highlightZoom 0.6s ease-in-out;
-      }
-
-      @keyframes highlightZoom {
-        0% {
-          transform: scale(1);
-          background-color: transparent;
-        }
-        25% {
-          transform: scale(1.05);
-          background-color: #fff3cd; /* màu vàng nhạt */
-        }
-        100% {
-          transform: scale(1);
-          background-color: transparent;
-        }
-      }
-    </style>
 
 {% endblock %}
