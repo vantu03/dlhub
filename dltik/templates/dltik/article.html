@@ -79,15 +79,20 @@
           a.href = `#${id}`;
             a.addEventListener("click", function (e) {
               e.preventDefault();
-              const target = document.getElementById(id);
-              if (target) {
-                target.scrollIntoView({ behavior: "smooth", block: "start" });
-                target.classList.add("highlight-heading");
-                setTimeout(() => {
-                  target.classList.remove("highlight-heading");
-                }, 600);
-              }
+            
+              location.hash = id;
+
+              setTimeout(() => {
+                const target = document.getElementById(id);
+                if (target) {
+                  target.classList.add("highlight-heading");
+                  setTimeout(() => {
+                    target.classList.remove("highlight-heading");
+                  }, 600);
+                }
+              }, 10);
             });
+
 
           a.textContent = heading.textContent;
           a.className = "text-decoration-none";
