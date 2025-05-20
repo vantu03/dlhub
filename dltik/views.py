@@ -46,11 +46,10 @@ def perform(request):
                             else:
                                 data = {
                                     'thumbnail': uploaded.thumbnail,
-                                    'urls': [
-                                        {f.label: f.url}
-                                        for f in uploaded.files.all()
-                                    ],
                                     'title': uploaded.title,
+                                    'urls': [
+                                        {f.label: f.url} for f in uploaded.files.all()
+                                    ]
                                 }
                                 utils.encode_data(data)
                                 return JsonResponse({'success': True, 'data': data})
@@ -68,7 +67,7 @@ def perform(request):
 
                         for label, fmt in formats.items():
                             t = threading.Thread(target=utils.download_format,
-                                                 args=(label, fmt, url, save, temp_files, data_lock, data))
+                                                 args=(label, fmt, url, save, temp_files, data_lock, data, request))
                             t.start()
                             threads.append(t)
 
@@ -84,7 +83,9 @@ def perform(request):
                         )
                         for label, url_path in temp_files.items():
                             File.objects.create(upload=upload, label=label, url=url_path)
+
                         utils.encode_data(data)
+
                         return JsonResponse({'success': True, 'data': data})
 
                 case 1:

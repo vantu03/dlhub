@@ -107,7 +107,6 @@ def encode_data(data):
 
     data['urls'] = new_urls
 
-
 def clean_expired_data(timeout_seconds=300):
     print('[Cleanup] Bắt đầu dọn dữ liệu quá hạn...')
     # Xóa bản ghi Upload cũ
