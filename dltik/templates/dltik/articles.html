@@ -1,37 +1,38 @@
 {% extends "dltik/base.html" %}
 {% block title %}Bài viết{% endblock %}
 {% block content %}
-<div class="container p-0">
-
+<div class="bg-white rounded shadow-sm p-4">
   {% if tag %}
     <h1 class="mb-4 fw-bold text-primary">Từ khóa "{{tag}}"</h1>
   {% else %}
     <h1 class="mb-4 fw-bold text-primary">Bài viết mới nhất</h1>
   {% endif %}
-  {% if articles %}
-    <div class="list-group">
-      {% for article in articles %}
-        <a href="{% url 'article' slug=article.slug %}" class="list-group-item list-group-item-action py-3 border rounded mb-3 shadow-sm">
-          <div class="d-flex align-items-start gap-3">
-            {% if article.cover_image %}
-              <img src="{{ article.cover_image }}" alt="{{ article.title }}"
-                   class="rounded" style="width: 100px; height: 100px; object-fit: cover;">
-            {% endif %}
-            <div>
-              <h5 class="fw-bold mb-1">
-                {{ article.title }}
-              </h5>
-              <p class="text-muted small mb-1">{{ article.summary }}</p>
-              <small class="text-secondary fst-italic">
-                <i class="bi bi-calendar3 me-1"></i>{{ article.published_at|date:"d/m/Y" }}
-              </small>
+  <div class="pt-3 border-top">
+    {% if articles %}
+      <div class="list-group">
+        {% for article in articles %}
+          <a href="{% url 'article' slug=article.slug %}" class="list-group-item list-group-item-action py-3 border rounded mb-3 shadow-sm">
+            <div class="d-flex align-items-start gap-3">
+              {% if article.cover_image %}
+                <img src="{{ article.cover_image }}" alt="{{ article.title }}"
+                     class="rounded" style="width: 100px; height: 100px; object-fit: cover;">
+              {% endif %}
+              <div>
+                <h5 class="fw-bold mb-1">
+                  {{ article.title }}
+                </h5>
+                <p class="text-muted small mb-1">{{ article.summary }}</p>
+                <small class="text-secondary fst-italic">
+                  <i class="bi bi-calendar3 me-1"></i>{{ article.published_at|date:"d/m/Y" }}
+                </small>
+              </div>
             </div>
-          </div>
-        </a>
-      {% endfor %}
-    </div>
-  {% else %}
-    <p class="text-muted">Hiện chưa có bài viết nào.</p>
-  {% endif %}
+          </a>
+        {% endfor %}
+      </div>
+    {% else %}
+      <p class="text-muted">Hiện chưa có bài viết nào.</p>
+    {% endif %}
+  </div>
 </div>
 {% endblock %}
