@@ -1,10 +1,8 @@
 from urllib.parse import urlparse, urlunparse
-import base64, json, hashlib, hmac
-import threading
-import time
-import os
+import base64, json, hashlib, hmac, threading, uuid, yt_dlp, os, time
 from django.utils import timezone
-from dltik.models import Upload, File
+from dltik.models import Upload
+from django.conf import settings
 
 _updater_started = False
 
@@ -46,10 +44,6 @@ def decode_token(encoded_token):
     except Exception as e:
         return {'error': 3, 'msg': str(e)}
 
-import threading, uuid, yt_dlp
-from urllib.parse import quote
-from django.conf import settings
-
 def download_format(label, fmt, url, save, temp_files, data_lock, data):
     try:
         filename = f"dlhub_{uuid.uuid4()}"
@@ -79,11 +73,13 @@ def download_format(label, fmt, url, save, temp_files, data_lock, data):
             if save:
                 path = f"/media/videos/{filename}.{ext}"
             else:
-                token = encode_token(
-                    data={"code": quote(info['url'], safe=''), "type": 1, "filename": f"{filename}.{ext}"},
-                    ts=-1
-                )
-                path = f"/perform?token={token}"
+                path = info['url']
+
+            token = encode_token(
+                data={"code":path, "type": 1, "filename": f"{filename}.{ext}"},
+                ts=-1
+            )
+            path = f"/perform?token={token}"
 
             with data_lock:
                 data['urls'].append({label: path})

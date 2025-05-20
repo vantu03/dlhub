@@ -1,10 +1,8 @@
 from django.http import JsonResponse
 from django.shortcuts import render
 from .models import Article, File, Upload, PinnedArticle
-from django.db.models import Q
 from dltik import utils
-from urllib.parse import quote
-import json, time, requests, urllib, threading
+import json, time, requests, threading
 from django.http import StreamingHttpResponse, HttpResponse
 from django.contrib.sitemaps import Sitemap
 from django.urls import reverse
@@ -55,8 +53,8 @@ def perform(request):
                                 }})
 
                         formats = {
-                            'Download': 'best[height<=1080]',
                             'Download <i class="bi bi-badge-hd-fill"></i>': 'best',
+                            'Download': 'best[height<=1080]',
                         }
 
                         data = {'thumbnail': '', 'title': '', 'urls': []}
@@ -90,9 +88,21 @@ def perform(request):
                     video_url = decoded.get('decoded', {}).get('code')
                     filename = decoded.get('decoded', {}).get('filename')
 
-                    r = requests.get(urllib.parse.unquote(video_url), stream=True)
-                    response = StreamingHttpResponse(r.iter_content(1024), content_type=r.headers['Content-Type'])
+                    try:
+                        r = requests.get(video_url, stream=True, timeout=10)
+                        r.raise_for_status()
+                    except requests.RequestException:
+                        return JsonResponse({'error': 'Không thể tải video từ URL'}, status=400)
+
+                    content_type = r.headers.get('Content-Type', 'application/octet-stream')
+                    content_length = r.headers.get('Content-Length')
+
+                    response = StreamingHttpResponse(r.iter_content(8192), content_type=content_type)
                     response['Content-Disposition'] = f'attachment; filename="{filename}"'
+
+                    if content_length:
+                        response['Content-Length'] = content_length
+
                     return response
 
         else:
