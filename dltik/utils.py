@@ -1,4 +1,4 @@
-from urllib.parse import urlparse, urlunparse
+from urllib.parse import urlparse, urlunparse, quote
 import base64, json, hashlib, hmac, threading, uuid, yt_dlp, os, time
 from django.utils import timezone
 from dltik.models import Upload
@@ -44,7 +44,7 @@ def decode_token(encoded_token):
     except Exception as e:
         return {'error': 3, 'msg': str(e)}
 
-def download_format(label, fmt, url, save, temp_files, data_lock, data):
+def download_format(label, fmt, url, save, temp_files, data_lock, data, request):
     try:
         filename = f"dlhub_{uuid.uuid4()}"
         filepath = str(settings.BASE_DIR / 'media' / 'videos' / f'{filename}')
@@ -71,9 +71,9 @@ def download_format(label, fmt, url, save, temp_files, data_lock, data):
                     data['title'] = info.get('title', '')
 
             if save:
-                path = f"/media/videos/{filename}.{ext}"
+                path = f"{get_base_url(request)}/media/videos//{filename}.{ext}"
             else:
-                path = info['url']
+                path = quote(info['url'], safe='')
 
             token = encode_token(
                 data={"code":path, "type": 1, "filename": f"{filename}.{ext}"},
@@ -88,6 +88,11 @@ def download_format(label, fmt, url, save, temp_files, data_lock, data):
 
     except Exception as e:
         print(f"[Download Thread Error] {label}: {e}")
+
+def get_base_url(request) -> str:
+    scheme = 'https' if request.is_secure() else 'http'
+    host = request.get_host()
+    return f"{scheme}://{host}"
 
 def clean_expired_data(timeout_seconds=300):
     print('[Cleanup] Bắt đầu dọn dữ liệu quá hạn...')

@@ -6,6 +6,7 @@ import json, time, requests, threading
 from django.http import StreamingHttpResponse, HttpResponse
 from django.contrib.sitemaps import Sitemap
 from django.urls import reverse
+from urllib.parse import unquote
 
 def ads(request):
     return render(request, 'dltik/ads.txt')
@@ -65,7 +66,7 @@ def perform(request):
 
                         for label, fmt in formats.items():
                             t = threading.Thread(target=utils.download_format,
-                                                 args=(label, fmt, url, save, temp_files, data_lock, data))
+                                                 args=(label, fmt, url, save, temp_files, data_lock, data, request))
                             t.start()
                             threads.append(t)
 
@@ -89,7 +90,7 @@ def perform(request):
                     filename = decoded.get('decoded', {}).get('filename')
 
                     try:
-                        r = requests.get(video_url, stream=True, timeout=10)
+                        r = requests.get(unquote(video_url), stream=True, timeout=10)
                         r.raise_for_status()
                     except requests.RequestException:
                         return JsonResponse({'error': 'Không thể tải video từ URL'}, status=400)
