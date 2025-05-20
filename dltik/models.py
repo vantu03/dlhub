@@ -45,6 +45,15 @@ class File(models.Model):
                 print(f"Failed to delete {full_path}")
         super().delete(*args, **kwargs)
 
+class Tag(models.Model):
+    name = models.CharField(max_length=100, unique=True)
+
+    class Meta:
+        ordering = ['name']
+
+    def __str__(self):
+        return self.name
+
 
 class Article(models.Model):
     title = models.CharField(max_length=200)
@@ -53,10 +62,11 @@ class Article(models.Model):
     content = RichTextField()
     cover_image = models.URLField(blank=True, null=True)
     show_toc = models.BooleanField(default=True, help_text="Show list automatically if there is title?")
+    show_meta = models.BooleanField(default=True, help_text="Enable if you want to display poster information and creation time")
     published_at = models.DateTimeField(default=timezone.now)
     is_published = models.BooleanField(default=True)
     author = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='articles')
-    tags = models.CharField(max_length=255, blank=True, help_text="Enter keywords, analyze using comma")
+    tags = models.ManyToManyField('Tag', blank=True, related_name='articles')
 
     class Meta:
         ordering = ['-published_at']
@@ -70,7 +80,7 @@ class Article(models.Model):
         super().save(*args, **kwargs)
 
     def get_tags(self):
-        return [tag.strip() for tag in self.tags.split(',') if tag.strip()]
+        return self.tags.all()
 
     def get_absolute_url(self):
         return reverse('article', kwargs={'slug': self.slug})

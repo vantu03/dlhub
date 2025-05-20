@@ -103,7 +103,9 @@ def perform(request):
 def articles(request, tag = None):
     articles = Article.objects.filter(is_published=True)
     if tag:
-        articles = articles.filter(Q(tags__icontains=tag)).distinct()
+        tag_list = [t.strip() for t in tag.split(',')]
+        articles = articles.filter(tags__name__in=tag_list).distinct()
+
     return render(request, 'dltik/articles.html', {'articles': articles, 'tag': tag})
 
 def article(request, slug):

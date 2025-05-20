@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Article, Upload, File, PinnedArticle
+from .models import Article, Upload, File, PinnedArticle, Tag
 
 @admin.register(Upload)
 class UploadAdmin(admin.ModelAdmin):
@@ -23,3 +23,8 @@ class PinnedArticleAdmin(admin.ModelAdmin):
     list_display = ("article", "order", "pinned_at", "note")
     search_fields = ("article__title",)
     ordering = ("order",)
+
+@admin.register(Tag)
+class TagAdmin(admin.ModelAdmin):
+    search_fields = ['name']
+    list_display = ['name']
