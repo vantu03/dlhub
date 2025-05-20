@@ -59,7 +59,6 @@ def download_format(label, fmt, url, save, temp_files, data_lock, data, request)
                 'Accept-Language': 'en-US,en;q=0.9',
             }
         }) as ydl:
-            print(f"bat dau tai {fmt}")
             info = ydl.extract_info(url, download=save)
             ext = info.get('ext', 'mp4')
 
@@ -71,20 +70,13 @@ def download_format(label, fmt, url, save, temp_files, data_lock, data, request)
                     data['title'] = info.get('title', '')
 
             if save:
-                path = f"{get_base_url(request)}/media/videos//{filename}.{ext}"
+                path = f"{get_base_url(request)}/media/videos/{filename}.{ext}"
             else:
-                path = quote(info['url'], safe='')
-
-            token = encode_token(
-                data={"code":path, "type": 1, "filename": f"{filename}.{ext}"},
-                ts=-1
-            )
-            path = f"/perform?token={token}"
+                path = info['url']
 
             with data_lock:
                 data['urls'].append({label: path})
                 temp_files[label] = path
-        print(f"tai xong {fmt}")
 
     except Exception as e:
         print(f"[Download Thread Error] {label}: {e}")
@@ -93,6 +85,28 @@ def get_base_url(request) -> str:
     scheme = 'https' if request.is_secure() else 'http'
     host = request.get_host()
     return f"{scheme}://{host}"
+
+def encode_data(data):
+    new_urls = []
+
+    for item in data['urls']:
+        for label, url in item.items():
+            path = urlparse(url).path
+            filename = path.split('/')[-1]
+
+            token = encode_token(
+                data={
+                    "code": quote(url, safe=''),
+                    "type": 1,
+                    "filename": filename
+                },
+                ts=-1
+            )
+            encoded_url = f"/perform?token={quote(token)}"
+            new_urls.append({label: encoded_url})
+
+    data['urls'] = new_urls
+
 
 def clean_expired_data(timeout_seconds=300):
     print('[Cleanup] Bắt đầu dọn dữ liệu quá hạn...')
@@ -140,3 +154,4 @@ def start_updater_once():
             time.sleep(DELAY_UPDATE)
 
     threading.Thread(target=loop, daemon=True).start()
+

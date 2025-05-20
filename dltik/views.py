@@ -44,14 +44,16 @@ def perform(request):
                             if time.time() - uploaded.created_at.timestamp() > 300:
                                 uploaded.delete()
                             else:
-                                return JsonResponse({'success': True, 'data': {
+                                data = {
                                     'thumbnail': uploaded.thumbnail,
                                     'urls': [
                                         {f.label: f.url}
                                         for f in uploaded.files.all()
                                     ],
                                     'title': uploaded.title,
-                                }})
+                                }
+                                utils.encode_data(data)
+                                return JsonResponse({'success': True, 'data': data})
 
                         formats = {
                             'Download <i class="bi bi-badge-hd-fill"></i>': 'best',
@@ -66,7 +68,7 @@ def perform(request):
 
                         for label, fmt in formats.items():
                             t = threading.Thread(target=utils.download_format,
-                                                 args=(label, fmt, url, save, temp_files, data_lock, data, request))
+                                                 args=(label, fmt, url, save, temp_files, data_lock, data))
                             t.start()
                             threads.append(t)
 
@@ -82,7 +84,7 @@ def perform(request):
                         )
                         for label, url_path in temp_files.items():
                             File.objects.create(upload=upload, label=label, url=url_path)
-
+                        utils.encode_data(data)
                         return JsonResponse({'success': True, 'data': data})
 
                 case 1:
