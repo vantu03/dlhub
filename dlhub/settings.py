@@ -131,7 +131,6 @@ CKEDITOR_CONFIGS = {
             'https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css',
             'https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css',
         ],
-        'skin': 'moono-dark',
         'allowedContent': True,
     }
 }
