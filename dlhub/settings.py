@@ -119,11 +119,11 @@ CKEDITOR_CONFIGS = {
             {'name': 'styles', 'items': ['Format', 'FontSize']},
             {'name': 'tools', 'items': ['RemoveFormat', 'Maximize']},
         ],
-        'height': '100%',
+        'height': 500,
         'width': 'auto',
         'toolbarCanCollapse': False,
         'removePlugins': 'elementspath',
-        'resize_enabled': False,
+        'resize_enabled': True,
         'filebrowserUploadUrl': "/ckeditor/upload/",
         'filebrowserBrowseUrl': "/ckeditor/browse/",
         'contentsCss': [
