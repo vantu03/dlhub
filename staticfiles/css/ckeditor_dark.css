@@ -1,4 +1,16 @@
-body {
-    color: #212529 !important;
-    background-color: #ffffff !important;
+body.cke_editable {
+  background-color: #1e1e1e !important;
+  color: #ffffff !important;
+}
+
+body.cke_editable pre,
+body.cke_editable code {
+  background: #2d2d2d !important;
+  color: #ffffff !important;
+}
+
+.cke_source {
+  background-color: #1e1e1e !important;
+  color: #ffffff !important;
+  font-family: Consolas, monospace !important;
 }
