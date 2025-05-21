@@ -136,6 +136,7 @@ def contact(request):
     return render(request, 'dltik/contact.html')
 
 class StaticViewSitemap(Sitemap):
+    protocol = 'https'
     priority = 0.8
     changefreq = 'monthly'
 
@@ -146,6 +147,7 @@ class StaticViewSitemap(Sitemap):
         return reverse(item)
 
 class ArticleSitemap(Sitemap):
+    protocol = 'https'
     changefreq = "weekly"
     priority = 0.9
 
