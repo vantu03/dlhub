@@ -131,6 +131,5 @@ CKEDITOR_CONFIGS = {
             '/static/css/ckeditor_dark.css',
         ],
         'allowedContent': True,
-        'extraAllowedContent': 'i[*]{*}(*)',
     }
 }
