@@ -1,6 +1,6 @@
 .cke_source {
-  background-color: #ffffff !important;  /* nền trắng */
-  color: #000000 !important;              /* chữ đen */
+  background-color: #ffffff;
+  color: black;
   font-family: Consolas, monospace !important;
   font-size: 14px;
 }
