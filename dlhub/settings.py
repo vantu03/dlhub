@@ -119,7 +119,7 @@ CKEDITOR_CONFIGS = {
             {'name': 'styles', 'items': ['Format', 'FontSize']},
             {'name': 'tools', 'items': ['RemoveFormat', 'Maximize']},
         ],
-        'height': 400,
+        'height': 500,
         'width': 'auto',
         'toolbarCanCollapse': False,
         'removePlugins': 'elementspath',
@@ -131,5 +131,6 @@ CKEDITOR_CONFIGS = {
             '/static/css/ckeditor_dark.css',
         ],
         'allowedContent': True,
+        'extraAllowedContent': 'i[*]{*}(*)',
     }
 }
