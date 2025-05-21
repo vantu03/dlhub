@@ -128,7 +128,7 @@ CKEDITOR_CONFIGS = {
         'filebrowserBrowseUrl': "/ckeditor/browse/",
         'contentsCss': [
             'https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css',
-            '/static/css/ckeditor_dark.css',
+            '/static/css/ckeditor_dark.css?v1',
         ],
         'allowedContent': True,
     }
