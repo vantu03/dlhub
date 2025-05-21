@@ -119,7 +119,7 @@ CKEDITOR_CONFIGS = {
             {'name': 'styles', 'items': ['Format', 'FontSize']},
             {'name': 'tools', 'items': ['RemoveFormat', 'Maximize']},
         ],
-        'height': 500,
+        'height': '100%',
         'width': 'auto',
         'toolbarCanCollapse': False,
         'removePlugins': 'elementspath',
