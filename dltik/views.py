@@ -156,8 +156,7 @@ class ArticleSitemap(Sitemap):
         return obj.published_at
 
 def robots_txt(request):
-    host = request.get_host()
-    sitemap_url = f"https://{host}/sitemap.xml"
+    sitemap_url = f"{utils.get_base_url(request)}/sitemap.xml"
     lines = [
         "User-agent: *",
         "Disallow: /admin/",
