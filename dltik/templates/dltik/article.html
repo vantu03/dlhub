@@ -33,7 +33,7 @@
       "@type": "Article",
       "headline": "{{ article.title|escapejs }}",
       "description": "{{ article.summary|default:article.content|truncatewords:25|striptags|escapejs }}",
-      "image": "{{ article.cover_image|default:static('images/banner.png') }}",
+      "image": "{% if article.cover_image %}{{ article.cover_image }}{% else %}{% static 'images/banner.png' %}{% endif %}",
       "author": {
         "@type": "Person",
         "name": "{{ article.author.get_full_name|default:article.author.username }}"
@@ -45,6 +45,8 @@
       }
     }
   </script>
+{% endblock %}
+
 {% endblock %}
 
 
