@@ -1,9 +1,10 @@
 from django.http import JsonResponse
 from django.shortcuts import render
-from .models import Article, File, Upload, PinnedArticle
+from .models import Article, File, Upload, PinnedArticle, Page
 from dltik import utils
 import json, time, requests, threading
 from django.http import StreamingHttpResponse, HttpResponse
+from django.template import Template, Context
 from django.contrib.sitemaps import Sitemap
 from django.urls import reverse
 from urllib.parse import unquote
@@ -166,3 +167,32 @@ def robots_txt(request):
         f"Sitemap: {sitemap_url}",
     ]
     return HttpResponse("\n".join(lines), content_type="text/plain")
+
+def page_view(request, slug):
+    page = Page.objects.filter(slug=slug).first()
+    if page:
+
+        match page.format:
+            case 'html':
+                template = Template(page.content)
+                context = Context({
+                    'request': request,
+                    'user': request.user,
+                    'site_name': page.name,
+                })
+                return HttpResponse(template.render(context))
+
+            case 'text':
+                return HttpResponse(page.content, content_type='text/plain')
+
+            case 'json':
+                try:
+                    parsed = json.loads(page.content)
+                    return JsonResponse(parsed)
+                except json.JSONDecodeError:
+                    return JsonResponse({'error': 'Lỗi json'}, status=400)
+
+            case _:
+                return HttpResponse("Unsupported format", status=415)
+    else:
+        return custom_404_view(request, None)

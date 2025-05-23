@@ -4,7 +4,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = 'django-insecure-*e+drp1##-#*#*@-2!^y!+%v4o3t13=oab46l385t899ahpx1l'
 
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = ['dlhub.vn', '.dlhub.vn', '127.0.0.1', 'localhost', '14.225.192.23']
 
@@ -46,7 +46,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
-                'dltik.context.current_url'
+                'dltik.context.current_url',
             ],
         },
     },

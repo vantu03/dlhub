@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Article, Upload, File, PinnedArticle, Tag
+from .models import Article, Upload, File, PinnedArticle, Tag, Page
 
 @admin.register(Upload)
 class UploadAdmin(admin.ModelAdmin):
@@ -28,3 +28,10 @@ class PinnedArticleAdmin(admin.ModelAdmin):
 class TagAdmin(admin.ModelAdmin):
     search_fields = ['name']
     list_display = ['name']
+
+@admin.register(Page)
+class PageAdmin(admin.ModelAdmin):
+    list_display = ("name", "slug", "format", "is_published", "updated_at")
+    search_fields = ("name", "slug", "content")
+    list_filter = ("format", "is_published", "updated_at")
+    prepopulated_fields = {"slug": ("name",)}

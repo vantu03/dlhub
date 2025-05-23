@@ -14,11 +14,6 @@ class Upload(models.Model):
     def __str__(self):
         return f"Upload: {self.title}"
 
-    def delete(self, *args, **kwargs):
-        for f in self.files.all():
-            f.delete()
-        super().delete(*args, **kwargs)
-
 class File(models.Model):
     upload = models.ForeignKey(Upload, related_name='files', on_delete=models.CASCADE)
     url = models.URLField()
@@ -27,23 +22,6 @@ class File(models.Model):
 
     def __str__(self):
         return f"{self.label} - {self.url}"
-
-    def delete(self, *args, **kwargs):
-        # Xóa file thật nếu còn tồn tại
-        from django.conf import settings
-        import os
-        path = self.url
-        if path.startswith("/media/"):
-            full_path = os.path.join(settings.BASE_DIR, path.lstrip("/"))
-            if os.path.isfile(full_path):
-                try:
-                    os.remove(full_path)
-                    print(f"Deleted: {full_path}")
-                except Exception as e:
-                    print(f"Failed to delete {full_path}: {e}")
-            else:
-                print(f"Failed to delete {full_path}")
-        super().delete(*args, **kwargs)
 
 class Tag(models.Model):
     name = models.CharField(max_length=100, unique=True)
@@ -96,3 +74,32 @@ class PinnedArticle(models.Model):
 
     def __str__(self):
         return f"Ghim: {self.article.title}"
+
+class Page(models.Model):
+    FORMAT_CHOICES = [
+        ('html', 'HTML'),
+        ('text', 'Plain Text'),
+        ('json', 'JSON'),
+    ]
+
+    name = models.CharField(max_length=200, unique=True)
+    slug = models.SlugField(unique=True)
+    content = models.TextField()
+    format = models.CharField(max_length=10, choices=FORMAT_CHOICES, default='html')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    is_published = models.BooleanField(default=True)
+
+    class Meta:
+        ordering = ['-updated_at']
+
+    def __str__(self):
+        return f"{self.name} ({self.format})"
+
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = slugify(self.name)
+        super().save(*args, **kwargs)
+
+    def get_absolute_url(self):
+        return f"/pages/{self.slug}/"
