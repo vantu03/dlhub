@@ -43,12 +43,11 @@ def perform(request):
                         formats = {
                             'Download <i class="bi bi-badge-hd-fill"></i>': 'best',
                             'Download': 'best[height<=720]',
-                            'Download <i class="bi bi-volume-mute-fill"></i>': 'bestvideo[ext=mp4]',
                         }
 
                         fmt_result = utils.get_formats(video_url)
                         for fmt in fmt_result.get('formats', []):
-                            if "hd" in fmt['format_id']:
+                            if "hd" in fmt['format_id'] and False:
                                 formats["Download "+ fmt['format_id']] = fmt['format_id']
                             print(f"{fmt['format_id']} - {fmt.get('height')}")
 
