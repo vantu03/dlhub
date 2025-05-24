@@ -81,6 +81,34 @@ def download_format(label, fmt, url, save, temp_files, data_lock, data, request)
     except Exception as e:
         print(f"[Download Thread Error] {label}: {e}")
 
+def get_formats(url):
+    ydl_opts = {
+        'quiet': True,
+        'skip_download': True,
+        'continuedl': False,
+        'noplaylist': True,
+        'http_headers': {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
+            'Accept-Language': 'en-US,en;q=0.9',
+        }
+    }
+
+    with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+        info = ydl.extract_info(url, download=False)
+        formats = info.get('formats', [])
+
+        # Trả ra thông tin định dạng có ích cho client
+        result = []
+        for f in formats:
+            result.append({
+                'format_id': f.get('format_id'),
+                'ext': f.get('ext'),
+                'resolution': f.get('height'),
+                'note': f.get('format_note'),
+                'filesize': f.get('filesize') or f.get('filesize_approx'),
+                'url': f.get('url'),  # link trực tiếp nếu cần preview
+            })
+        return result
 def get_base_url(request) -> str:
     scheme = 'https' if request.is_secure() else 'http'
     host = request.get_host()

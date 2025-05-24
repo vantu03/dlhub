@@ -39,25 +39,10 @@ def perform(request):
                 case 0:
                     url = utils.strip_query_params(decoded.get('decoded', {}).get('code'))
                     if url:
-                        # Check nếu đã tồn tại và chưa quá hạn
-                        uploaded = Upload.objects.filter(source_url=url).first()
-                        if uploaded:
-                            if time.time() - uploaded.created_at.timestamp() > 300:
-                                uploaded.delete()
-                            else:
-                                data = {
-                                    'thumbnail': uploaded.thumbnail,
-                                    'title': uploaded.title,
-                                    'urls': [
-                                        {f.label: f.url} for f in uploaded.files.all()
-                                    ]
-                                }
-                                utils.encode_data(data)
-                                return JsonResponse({'success': True, 'data': data})
 
                         formats = {
                             'Download <i class="bi bi-badge-hd-fill"></i>': 'best',
-                            'Download': 'best[height<=1080]',
+                            'Download': 'best[height<1080]',
                         }
 
                         data = {'thumbnail': '', 'title': '', 'urls': []}
