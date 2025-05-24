@@ -139,9 +139,6 @@ def clean_expired_data(timeout_seconds=300):
     print('[Cleanup] Bắt đầu dọn dữ liệu quá hạn...')
     # Xóa bản ghi Upload cũ
     now = timezone.now()
-    expired_uploads = Upload.objects.filter(created_at__lt=now - timezone.timedelta(seconds=timeout_seconds))
-    for upload in expired_uploads:
-        upload.delete()
 
     # Xóa file dlhub_ cũ
     media_path = os.path.join(settings.BASE_DIR, 'media', 'videos')
