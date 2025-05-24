@@ -16,7 +16,7 @@ class Upload(models.Model):
 
 class File(models.Model):
     upload = models.ForeignKey(Upload, related_name='files', on_delete=models.CASCADE)
-    url = models.URLField()
+    url = models.URLField(max_length=2000)
     label = models.CharField(max_length=100)
     created_at = models.DateTimeField(auto_now_add=True)
 

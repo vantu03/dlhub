@@ -37,37 +37,34 @@ def perform(request):
         if decoded.get('ok'):
             match decoded.get('decoded', {}).get('type'):
                 case 0:
-                    url = utils.strip_query_params(decoded.get('decoded', {}).get('code'))
-                    if url:
+                    video_url = utils.strip_query_params(decoded.get('decoded', {}).get('code'))
+                    if video_url:
 
                         formats = {
                             'Download <i class="bi bi-badge-hd-fill"></i>': 'best',
                             'Download': 'best[height<=720]',
+                            'Download <i class="bi bi-volume-mute-fill"></i>': 'bestvideo[ext=mp4]',
                         }
 
-                        fmt_result = utils.get_formats(url)
+                        fmt_result = utils.get_formats(video_url)
                         for fmt in fmt_result.get('formats', []):
+                            if "hd" in fmt['format_id']:
+                                formats["Download "+ fmt['format_id']] = fmt['format_id']
                             print(f"{fmt['format_id']} - {fmt.get('height')}")
-                            pass
 
                         upload = Upload.objects.create(
-                            source_url=url,
+                            source_url=video_url,
                             title=fmt_result.get('title', ''),
                             thumbnail=fmt_result.get('thumbnail', ''),
                         )
 
-                        data = {
-                            'title': fmt_result.get('title', ''),
-                            'thumbnail': fmt_result.get('thumbnail', ''),
-                            'urls': []
-                        }
-
-
                         save = decoded.get('decoded', {}).get('type1') == 0
                         threads = []
                         for label, fmt in formats.items():
-                            t = threading.Thread(target=utils.download_format,
-                                                 args=(label, fmt, url, upload, save, request))
+                            t = threading.Thread(
+                                target=utils.download_format,
+                                args=(label, fmt, video_url, upload, save, request)
+                            )
                             t.start()
                             threads.append(t)
 
@@ -75,19 +72,24 @@ def perform(request):
                         for t in threads:
                             t.join()
 
-                        for f in upload.files.all():
-                            data['urls'].append({f.label: f.url})
-
+                        data = {
+                            'title': upload.title,
+                            'thumbnail': upload.thumbnail,
+                            'urls': [{f.label: f.url} for f in upload.files.all()]
+                        }
                         utils.encode_data(data)
-
                         return JsonResponse({'success': True, 'data': data})
+
 
                 case 1:
                     video_url = decoded.get('decoded', {}).get('code')
                     filename = decoded.get('decoded', {}).get('filename')
 
                     try:
-                        r = requests.get(unquote(video_url), stream=True, timeout=10)
+                        r = requests.get(unquote(video_url), headers={
+                            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
+                            'Accept-Language': 'en-US,en;q=0.9',
+                        }, stream=True, timeout=10)
                         r.raise_for_status()
                     except requests.RequestException:
                         return JsonResponse({'error': 'Không thể tải video từ URL: '+ unquote(video_url) + ' filename: '+ filename}, status=400)

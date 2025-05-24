@@ -44,7 +44,7 @@ def decode_token(encoded_token):
     except Exception as e:
         return {'error': 3, 'msg': str(e)}
 
-def download_format(label, fmt, url, upload, save, request):
+def download_format(label, fmt, video_url, upload, save, request):
     try:
         filename = f"dlhub_{uuid.uuid4()}"
         filepath = str(settings.BASE_DIR / 'media' / 'videos' / f'{filename}')
@@ -59,16 +59,15 @@ def download_format(label, fmt, url, upload, save, request):
                 'Accept-Language': 'en-US,en;q=0.9',
             }
         }) as ydl:
-            info = ydl.extract_info(url, download=save)
+            info = ydl.extract_info(video_url, download=save)
             ext = info.get('ext', 'mp4')
 
             if save:
                 path = f"{get_base_url(request)}/media/videos/{filename}.{ext}"
             else:
-                path = info['url']
+                path = info.get('url', '')
 
-            if upload:
-                File.objects.create(upload=upload, label=label, url=path)
+            File.objects.create(upload=upload, label=label, url=path)
 
 
     except Exception as e:
