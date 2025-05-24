@@ -95,20 +95,8 @@ def get_formats(url):
 
     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
         info = ydl.extract_info(url, download=False)
-        formats = info.get('formats', [])
+        return info
 
-        # Trả ra thông tin định dạng có ích cho client
-        result = []
-        for f in formats:
-            result.append({
-                'format_id': f.get('format_id'),
-                'ext': f.get('ext'),
-                'resolution': f.get('height'),
-                'note': f.get('format_note'),
-                'filesize': f.get('filesize') or f.get('filesize_approx'),
-                'url': f.get('url'),  # link trực tiếp nếu cần preview
-            })
-        return result
 def get_base_url(request) -> str:
     scheme = 'https' if request.is_secure() else 'http'
     host = request.get_host()

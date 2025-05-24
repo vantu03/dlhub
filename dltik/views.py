@@ -42,10 +42,15 @@ def perform(request):
 
                         formats = {
                             'Download <i class="bi bi-badge-hd-fill"></i>': 'best',
-                            'Download': 'best[height<1080]',
+                            'Download': 'best[height<=720]',
                         }
 
-                        data = {'thumbnail': '', 'title': '', 'urls': []}
+                        fmt_result = utils.get_formats(url)
+                        for fmt in fmt_result.get('formats', []):
+                            print(f"{fmt['format_id']} - {fmt.get('height')}")
+                            pass
+
+                        data = {'thumbnail': fmt_result.get('thumbnail', ''), 'title': fmt_result.get('title', ''), 'urls': []}
                         save = decoded.get('decoded', {}).get('type1') == 0
                         temp_files = {}
                         threads = []
