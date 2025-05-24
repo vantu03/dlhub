@@ -50,15 +50,24 @@ def perform(request):
                             print(f"{fmt['format_id']} - {fmt.get('height')}")
                             pass
 
-                        data = {'thumbnail': fmt_result.get('thumbnail', ''), 'title': fmt_result.get('title', ''), 'urls': []}
-                        save = decoded.get('decoded', {}).get('type1') == 0
-                        temp_files = {}
-                        threads = []
-                        data_lock = threading.Lock()
+                        upload = Upload.objects.create(
+                            source_url=url,
+                            title=fmt_result.get('title', ''),
+                            thumbnail=fmt_result.get('thumbnail', ''),
+                        )
 
+                        data = {
+                            'title': fmt_result.get('title', ''),
+                            'thumbnail': fmt_result.get('thumbnail', ''),
+                            'urls': []
+                        }
+
+
+                        save = decoded.get('decoded', {}).get('type1') == 0
+                        threads = []
                         for label, fmt in formats.items():
                             t = threading.Thread(target=utils.download_format,
-                                                 args=(label, fmt, url, save, temp_files, data_lock, data, request))
+                                                 args=(label, fmt, url, upload, save, request))
                             t.start()
                             threads.append(t)
 
@@ -66,14 +75,8 @@ def perform(request):
                         for t in threads:
                             t.join()
 
-                        # Sau khi tất cả hoàn tất thì lưu DB
-                        upload = Upload.objects.create(
-                            source_url=url,
-                            title=data['title'],
-                            thumbnail=data['thumbnail'],
-                        )
-                        for label, url_path in temp_files.items():
-                            File.objects.create(upload=upload, label=label, url=url_path)
+                        for f in upload.files.all():
+                            data['urls'].append({f.label: f.url})
 
                         utils.encode_data(data)
 
@@ -87,7 +90,7 @@ def perform(request):
                         r = requests.get(unquote(video_url), stream=True, timeout=10)
                         r.raise_for_status()
                     except requests.RequestException:
-                        return JsonResponse({'error': 'Không thể tải video từ URL'}, status=400)
+                        return JsonResponse({'error': 'Không thể tải video từ URL: '+ unquote(video_url) + ' filename: '+ filename}, status=400)
 
                     content_type = r.headers.get('Content-Type', 'application/octet-stream')
                     content_length = r.headers.get('Content-Length')

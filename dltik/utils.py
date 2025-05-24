@@ -1,7 +1,7 @@
 from urllib.parse import urlparse, urlunparse, quote
 import base64, json, hashlib, hmac, threading, uuid, yt_dlp, os, time
 from django.utils import timezone
-from dltik.models import Upload
+from dltik.models import File
 from django.conf import settings
 
 _updater_started = False
@@ -44,7 +44,7 @@ def decode_token(encoded_token):
     except Exception as e:
         return {'error': 3, 'msg': str(e)}
 
-def download_format(label, fmt, url, save, temp_files, data_lock, data, request):
+def download_format(label, fmt, url, upload, save, request):
     try:
         filename = f"dlhub_{uuid.uuid4()}"
         filepath = str(settings.BASE_DIR / 'media' / 'videos' / f'{filename}')
@@ -62,21 +62,14 @@ def download_format(label, fmt, url, save, temp_files, data_lock, data, request)
             info = ydl.extract_info(url, download=save)
             ext = info.get('ext', 'mp4')
 
-            # Thread-safe update
-            with data_lock:
-                if not data['thumbnail']:
-                    data['thumbnail'] = info.get('thumbnail', '')
-                if not data['title']:
-                    data['title'] = info.get('title', '')
-
             if save:
                 path = f"{get_base_url(request)}/media/videos/{filename}.{ext}"
             else:
                 path = info['url']
 
-            with data_lock:
-                data['urls'].append({label: path})
-                temp_files[label] = path
+            if upload:
+                File.objects.create(upload=upload, label=label, url=path)
+
 
     except Exception as e:
         print(f"[Download Thread Error] {label}: {e}")
