@@ -5,30 +5,110 @@
   {% if tag %}
     <h1 class="mb-4 fw-bold text-primary">Từ khóa "{{tag}}"</h1>
   {% else %}
-    <h1 class="mb-4 fw-bold text-primary">Bài viết mới nhất</h1>
+    <h1 class="mb-4 fw-bold text-primary">
+        <i class="bi bi-journal-text me-2"></i>Danh sách bài viết
+    </h1>
+
   {% endif %}
-  <div class="pt-3 border-top">
-    {% if articles %}
+  <form method="get" class="row row-cols-1 row-cols-lg-auto g-3 align-items-end mb-4 border-top pt-3" id="articleFilterForm">
+    <div class="col">
+      <label for="searchInput" class="form-label fw-semibold">Tìm kiếm</label>
+      <div class="input-group">
+        <input type="text" id="searchInput" name="q" class="form-control" placeholder="Nhập nội dung tìm kếm..." value="{{ request.GET.q }}">
+        <button type="submit" class="btn btn-primary">
+          <i class="bi bi-search"></i> Tìm
+        </button>
+      </div>
+    </div>
+
+    <div class="col">
+      <label for="sortSelect" class="form-label fw-semibold">Lọc theo</label>
+      <select id="sortSelect" class="form-select" name="sort" onchange="document.getElementById('articleFilterForm').submit()">
+        <option value="desc" {% if request.GET.sort == "desc" or not request.GET.sort %}selected{% endif %}>Mới nhất</option>
+        <option value="asc" {% if request.GET.sort == "asc" %}selected{% endif %}>Cũ nhất</option>
+      </select>
+    </div>
+  </form>
+
+
+
+  <div class="pt-3">
+    {% if page_obj %}
       <div class="list-group">
-        {% for article in articles %}
+        {% for article in page_obj %}
           <a href="{% url 'article' slug=article.slug %}" class="list-group-item list-group-item-action py-3 border rounded mb-3 shadow-sm">
-            <div class="d-flex align-items-start gap-3">
+            <article itemscope itemtype="https://schema.org/Article" class="d-flex align-items-start gap-3">
               {% if article.cover_image %}
                 <img src="{{ article.cover_image }}" alt="{{ article.title }}"
-                     class="rounded" style="width: 100px; height: 100px; object-fit: cover;">
+                     class="rounded" style="width: 100px; height: 100px; object-fit: cover;" itemprop="image">
               {% endif %}
               <div>
-                <h5 class="fw-bold mb-1">
-                  {{ article.title }}
-                </h5>
-                <p class="text-muted small mb-1">{{ article.summary }}</p>
+                <h5 class="fw-bold mb-1" itemprop="headline">{{ article.title }}</h5>
+                <p class="text-muted small mb-1" itemprop="description">{{ article.summary }}</p>
                 <small class="text-secondary fst-italic">
-                  <i class="bi bi-calendar3 me-1"></i>{{ article.published_at|date:"d/m/Y" }}
+                  <i class="bi bi-calendar3 me-1"></i>
+                  <time itemprop="datePublished" datetime="{{ article.published_at|date:'Y-m-d' }}">
+                    {{ article.published_at|date:"d/m/Y" }}
+                  </time>
                 </small>
               </div>
-            </div>
+            </article>
+
           </a>
         {% endfor %}
+        {% if page_obj.has_other_pages %}
+          <nav class="mt-4" aria-label="Pagination">
+            <ul class="pagination justify-content-center">
+
+              <!-- Nút "Trang trước" -->
+              {% if page_obj.has_previous %}
+                <li class="page-item">
+                  <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if tag %}&tag={{ tag }}{% endif %}" aria-label="Trang trước">
+                    <i class="bi bi-chevron-left"></i>
+                    <span class="visually-hidden">Trang trước</span>
+                  </a>
+                </li>
+              {% else %}
+                <li class="page-item disabled">
+                  <span class="page-link" aria-hidden="true">
+                    <i class="bi bi-chevron-left"></i>
+                  </span>
+                </li>
+              {% endif %}
+
+              <!-- Các số trang -->
+              {% for i in page_obj.paginator.page_range %}
+                {% if page_obj.number == i %}
+                  <li class="page-item active" aria-current="page">
+                    <span class="page-link">{{ i }}</span>
+                  </li>
+                {% else %}
+                  <li class="page-item">
+                    <a class="page-link" href="?page={{ i }}{% if tag %}&tag={{ tag }}{% endif %}">{{ i }}</a>
+                  </li>
+                {% endif %}
+              {% endfor %}
+
+              <!-- Nút "Trang sau" -->
+              {% if page_obj.has_next %}
+                <li class="page-item">
+                  <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if tag %}&tag={{ tag }}{% endif %}" aria-label="Trang sau">
+                    <i class="bi bi-chevron-right"></i>
+                    <span class="visually-hidden">Trang sau</span>
+                  </a>
+                </li>
+              {% else %}
+                <li class="page-item disabled">
+                  <span class="page-link" aria-hidden="true">
+                    <i class="bi bi-chevron-right"></i>
+                  </span>
+                </li>
+              {% endif %}
+
+            </ul>
+          </nav>
+        {% endif %}
+
       </div>
     {% else %}
       <p class="text-muted">Hiện chưa có bài viết nào.</p>

@@ -1,7 +1,6 @@
 from django.urls import path
 from . import views
 from django.contrib.sitemaps.views import sitemap
-
 urlpatterns = [
     path('', views.home, name='home'),
     path('perform/', views.perform, name='perform'),
@@ -15,5 +14,8 @@ urlpatterns = [
     path('sitemap.xml', sitemap, {'sitemaps': {'static': views.StaticViewSitemap, 'articles': views.ArticleSitemap, }}, name='sitemap'),
     path("robots.txt", views.robots_txt, name="robots_txt"),
     path('pages/<slug:slug>/', views.page_view, name='page_view'),
+    path("user/login/", views.login, name="login"),
+    path("user/logout/", views.logout, name="logout"),
+    path("user/register/", views.register, name="register"),
 ]
 

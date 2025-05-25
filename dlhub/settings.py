@@ -4,7 +4,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = 'django-insecure-*e+drp1##-#*#*@-2!^y!+%v4o3t13=oab46l385t899ahpx1l'
 
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = ['dlhub.vn', '.dlhub.vn', '127.0.0.1', 'localhost', '14.225.192.23']
 
@@ -133,3 +133,6 @@ CKEDITOR_CONFIGS = {
         'allowedContent': True,
     }
 }
+
+RECAPTCHA_SITE_KEY = "6Le56kgrAAAAABz-8PWQpwY7vd3nRIwIhfd_kZmN"
+RECAPTCHA_SECRET_KEY = "6Le56kgrAAAAADdB5HrWZzn1DqSztvaZhea_F0-j"

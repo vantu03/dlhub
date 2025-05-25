@@ -38,6 +38,7 @@ class Article(models.Model):
     slug = models.SlugField(unique=True, blank=True)
     summary = models.CharField(max_length=255, blank=True)
     content = RichTextField()
+    views = models.PositiveIntegerField(default=0)
     cover_image = models.URLField(blank=True, null=True)
     show_toc = models.BooleanField(default=True, help_text="Show list automatically if there is title?")
     show_meta = models.BooleanField(default=True, help_text="Enable if you want to display poster information and creation time")
@@ -103,3 +104,11 @@ class Page(models.Model):
 
     def get_absolute_url(self):
         return f"/pages/{self.slug}/"
+
+class Favorite(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    article = models.ForeignKey(Article, on_delete=models.CASCADE)
+    added_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('user', 'article')

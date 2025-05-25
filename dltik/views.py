@@ -1,13 +1,20 @@
 from django.http import JsonResponse
 from django.shortcuts import render
-from .models import Article, File, Upload, PinnedArticle, Page
+from .models import Article, User, Upload, PinnedArticle, Page, Favorite
 from dltik import utils
-import json, time, requests, threading
+import json, time, requests, threading, re
 from django.http import StreamingHttpResponse, HttpResponse
 from django.template import Template, Context
 from django.contrib.sitemaps import Sitemap
 from django.urls import reverse
 from urllib.parse import unquote
+from django.core.paginator import Paginator
+from django.db.models import Q, F
+from django.shortcuts import redirect
+from django.contrib.auth import authenticate, login as auth_login, logout as auth_logout
+from django.conf import settings
+from urllib.parse import quote
+from django.utils.http import url_has_allowed_host_and_scheme
 
 def ads(request):
     return render(request, 'dltik/ads.txt')
@@ -109,18 +116,59 @@ def perform(request):
 
     return JsonResponse({'error': 'Thao tác không hợp lệ'+ str_token}, status=400)
 
-def articles(request, tag = None):
+def articles(request, tag=None):
     articles = Article.objects.filter(is_published=True)
+
     if tag:
         tag_list = [t.strip() for t in tag.split(',')]
         articles = articles.filter(tags__name__in=tag_list).distinct()
 
-    return render(request, 'dltik/articles.html', {'articles': articles, 'tag': tag})
+    # Tìm kiếm theo tiêu đề hoặc tóm tắt
+    query = request.GET.get('q')
+    if query:
+        articles = articles.filter(
+            Q(title__icontains=query) | Q(summary__icontains=query)
+        )
+
+    # Sắp xếp theo thời gian
+    sort_order = request.GET.get('sort', 'desc')
+    if sort_order == 'asc':
+        articles = articles.order_by('published_at')
+    else:
+        articles = articles.order_by('-published_at')
+
+    # Phân trang
+    paginator = Paginator(articles, 10)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    return render(request, 'dltik/articles.html', {
+        'page_obj': page_obj,
+        'tag': tag,
+    })
 
 def article(request, slug):
     article = Article.objects.filter(slug=slug).first()
     if article:
-        return render(request, 'dltik/article.html', {'article': article})
+        is_favorited = False
+
+        if request.method == "POST":
+            if request.POST.get("action") == "toggle_favorite":
+
+                if request.user.is_authenticated:
+                    fav, created = Favorite.objects.get_or_create(user=request.user, article=article)
+                    if not created:
+                        fav.delete()
+                else:
+                    return redirect(f"{reverse('login')}?next={quote(request.get_full_path())}")
+
+        if request.user.is_authenticated:
+            is_favorited = Favorite.objects.filter(user=request.user, article=article).exists()
+
+        article.views += 1
+        article.save()
+
+        return render(request, 'dltik/article.html', {'article': article, 'is_favorited': is_favorited})
     else:
         return custom_404_view(request, None)
 
@@ -190,3 +238,123 @@ def page_view(request, slug):
                 return HttpResponse("Unsupported format", status=415)
     else:
         return custom_404_view(request, None)
+
+def login(request):
+    if request.user.is_authenticated:
+        next_url = request.GET.get("next", "home")
+        if not url_has_allowed_host_and_scheme(next_url, allowed_hosts={request.get_host()}) or len(next_url) > 200:
+            next_url = "home"
+        return redirect(next_url)
+    messages = []
+    labels = []
+
+    if request.method == "POST":
+        username = request.POST.get("username")
+        password = request.POST.get("password")
+        if not username or not password:
+            messages.append({"type": "warning","msg": "Hãy nhập đầy đủ thông tin."})
+            if not username:
+                labels.append('username')
+            if not password:
+                labels.append('password')
+
+        else:
+            if utils.is_valid_email(username):
+                result = User.objects.filter(email=username.strip().lower()).first()
+                if result:
+                    username = result.username
+            user = authenticate(request, username=username, password=password)
+            if user is not None:
+                auth_login(request, user)
+
+                next_url = request.GET.get("next", "home")
+                if not url_has_allowed_host_and_scheme(next_url, allowed_hosts={request.get_host()}) or len(
+                        next_url) > 200:
+                    next_url = "home"
+                return redirect(next_url)
+            else:
+                messages.append({"type": "danger", "msg": "Tên đăng nhập/email hoặc mật khẩu không đúng."})
+
+    return render(request, "dltik/login.html", {"messages": messages, "labels": labels})
+
+def logout(request):
+
+    next_url = request.GET.get("next", "home")
+    if not url_has_allowed_host_and_scheme(next_url, allowed_hosts={request.get_host()}) or len(next_url) > 200:
+        next_url = "home"
+
+    if request.method == "POST":
+        if request.user.is_authenticated:
+            auth_logout(request)
+        return redirect(next_url)
+    return render(request, "dltik/logout.html", {"next_url": next_url})
+
+def register(request):
+    if request.user.is_authenticated:
+        next_url = request.GET.get("next", "home")
+        if not url_has_allowed_host_and_scheme(next_url, allowed_hosts={request.get_host()}) or len(next_url) > 200:
+            next_url = "home"
+        return redirect(next_url)
+
+    messages = []
+    labels = []
+
+    if request.method == "POST":
+        username = request.POST.get("username")
+        email = request.POST.get("email")
+        password = request.POST.get("password")
+        confirm_password = request.POST.get("confirm_password")
+        recaptcha_response = request.POST.get("g-recaptcha-response")
+
+        # Validate form
+        if not all([username, email, password, confirm_password]):
+            messages.append({"type": "warning", "msg": "Hãy nhập đầy đủ thông tin."})
+            if not username: labels.append("username")
+            if not email: labels.append("email")
+            if not password: labels.append("password")
+            if not confirm_password: labels.append("confirm_password")
+        elif not re.fullmatch(r'[a-zA-Z0-9_]{5,20}', username):
+            messages.append({"type": "danger", "msg": "Tên đăng nhập phải từ 5–20 ký tự, chỉ chứa chữ, số, gạch dưới."})
+            labels.append("username")
+        elif not (8 <= len(password) <= 30):
+            messages.append({"type": "danger", "msg": "Mật khẩu phải dài từ 8 đến 30 ký tự."})
+            labels.append("password")
+        elif password != confirm_password:
+            messages.append({"type": "danger", "msg": "Mật khẩu không khớp."})
+            labels.extend(["password", "confirm_password"])
+        elif not utils.is_valid_email(email):
+            messages.append({"type": "danger", "msg": "Email không hợp lệ."})
+            labels.append("email")
+        elif User.objects.filter(username=username).exists():
+            messages.append({"type": "danger", "msg": "Tên đăng nhập đã tồn tại."})
+            labels.append("username")
+        elif User.objects.filter(email=email).exists():
+            messages.append({"type": "danger", "msg": "Email đã được sử dụng."})
+            labels.append("email")
+        else:
+            # Verify reCAPTCHA
+            recaptcha_data = {
+                'secret': settings.RECAPTCHA_SECRET_KEY,
+                'response': recaptcha_response
+            }
+            recaptcha_result = requests.post(
+                'https://www.google.com/recaptcha/api/siteverify',
+                data=recaptcha_data
+            ).json()
+
+            if recaptcha_result.get("success"):
+                # Tạo người dùng
+                user = User.objects.create_user(username=username, email=email.strip().lower(), password=password)
+                auth_login(request, user)
+                next_url = request.GET.get("next", "home")
+                if not url_has_allowed_host_and_scheme(next_url, allowed_hosts={request.get_host()}) or len(next_url) > 200:
+                    next_url = "home"
+                return redirect(next_url)
+            else:
+                messages.append({"type": "danger", "msg": "Xác minh reCAPTCHA thất bại. Vui lòng thử lại."})
+
+    return render(request, "dltik/register.html", {
+        "messages": messages,
+        "labels": labels,
+        "recaptcha_site_key": settings.RECAPTCHA_SITE_KEY,
+    })

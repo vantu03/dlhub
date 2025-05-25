@@ -3,6 +3,8 @@ import base64, json, hashlib, hmac, threading, uuid, yt_dlp, os, time
 from django.utils import timezone
 from dltik.models import File
 from django.conf import settings
+from django.core.validators import validate_email
+from django.core.exceptions import ValidationError
 
 _updater_started = False
 
@@ -163,3 +165,9 @@ def start_updater_once():
 
     threading.Thread(target=loop, daemon=True).start()
 
+def is_valid_email(email: str):
+    try:
+        validate_email(email)
+        return True
+    except ValidationError:
+        return False
