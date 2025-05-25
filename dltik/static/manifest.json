@@ -1,0 +1,25 @@
+{
+  "name": "DLHub",
+  "short_name": "DLHub",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#2196f3",
+  "orientation": "portrait",
+  "lang": "vi",
+  "description": "DLHub - Nền tảng chia sẻ và khám phá dữ liệu hiệu quả.",
+  "icons": [
+    {
+      "src": "/static/images/android-chrome-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/static/images/android-chrome-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+
+}
