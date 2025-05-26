@@ -47,6 +47,7 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
                 'dltik.context.current_url',
+                'dltik.context.themes_context',
             ],
         },
     },
@@ -136,3 +137,8 @@ CKEDITOR_CONFIGS = {
 
 RECAPTCHA_SITE_KEY = "6Le56kgrAAAAABz-8PWQpwY7vd3nRIwIhfd_kZmN"
 RECAPTCHA_SECRET_KEY = "6Le56kgrAAAAADdB5HrWZzn1DqSztvaZhea_F0-j"
+THEMES = [
+    {"mode": "light", "text": "Sáng", "icon": "bi-sun"},
+    {"mode": "dark", "text": "Tối", "icon": "bi-moon"},
+]
+

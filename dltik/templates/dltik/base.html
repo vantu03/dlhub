@@ -39,6 +39,7 @@
     {% if request.GET %}
       <meta name="robots" content="noindex, follow">
     {% endif %}
+    <link rel="stylesheet" href="{% static 'css/thames.css' %}">
 
     <!-- Service Worker -->
     <script>
@@ -88,13 +89,15 @@
       gtag('event', 'conversion', {'send_to': 'AW-11499685493/TUZqCMzA7scaEPWMvesq'});
     </script>
 
-
+<style>
+</style>
 
 </head>
-<body>
+<body class="{{ request.session.mode|default:'light' }}-mode">
+
     <!-- Header -->
     <header class="bg-dark mb-4 sticky-top">
-        <nav class="navbar navbar-expand-lg navbar-dark container">
+        <nav class="navbar navbar-expand-lg navbar-dark">
             <a class="navbar-brand d-flex align-items-center" href="/">
                 <img src="{% static 'images/logo.png' %}" alt="DLHub" height="40" class="me-2">
                 <span class="visually-hidden">DLHub</span>
@@ -130,10 +133,11 @@
                          href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                         <i class="bi bi-person-circle"></i> Cá nhân
                       </a>
-                      <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                      <ul class="dropdown-menu dropdown-menu-end dropdown-menu-dark" aria-labelledby="userDropdown">
+
                         {% if user.is_authenticated %}
                             <li>
-                                <span class="dropdown-item-text text-muted">
+                                <span class="dropdown-item-text">
                                     Chào, <strong>{{ user.username }}</strong>
                                 </span>
                             </li>
@@ -164,6 +168,17 @@
                               </a>
                           </li>
                         {% endif %}
+                        <li>
+                            <div class="d-flex px-2 gap-2 mt-3">
+                                {% for theme in THEMES %}
+                                    <a href="{% url 'set_theme' theme.mode %}?next={{ request.get_full_path|urlencode }}"
+                                       class="btn btn-sm {% if theme.mode == request.session.mode|default:'light' %}btn-primary{% else %}btn-outline-secondary{% endif %} position-relative"
+                                       title="{{ theme.text }}">
+                                        <i class="bi {{ theme.icon }}"></i>
+                                    </a>
+                                {% endfor %}
+                            </div>
+                        </li>
                       </ul>
                     </li>
 
@@ -178,7 +193,7 @@
     </main>
 
     <!-- Footer -->
-    <footer class="bg-light text-center text-muted py-4 mt-5">
+    <footer class="bg-light text-center py-4 mt-5">
         <div class="container">
             <p class="mb-1">
                 &copy; {% now "Y" %} DLHub Version 2.1

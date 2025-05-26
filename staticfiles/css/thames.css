@@ -1,0 +1,165 @@
+
+@media (max-width: 991.98px) {
+    .navbar-collapse {
+      max-height: 70vh;
+      overflow-y: auto;
+    }
+}
+
+/* Nền và màu chữ mặc định */
+body.dark-mode {
+  background-color: #121212;
+  color: #e0e0e0;
+}
+
+/* Ghi đè các nền sáng */
+.dark-mode .bg-white,
+.dark-mode .bg-light,
+.dark-mode .card,
+.dark-mode .modal-content {
+  background-color: #1f1f1f !important;
+  color: #f0f0f0;
+}
+
+/* Ghi đè text đen */
+.dark-mode .text-dark {
+  color: #f0f0f0 !important;
+}
+
+/* Màu muted */
+.dark-mode .text-muted {
+  color: #b0b0b0 !important;
+}
+
+/* Navbar, dropdown, form... */
+.dark-mode .navbar,
+.dark-mode .dropdown-menu {
+  background-color: #1e1e1e !important;
+  color: #f0f0f0;
+}
+
+.dark-mode .dropdown-item {
+  color: #e0e0e0;
+}
+
+.dark-mode .dropdown-item:hover,
+.dark-mode .dropdown-item:focus {
+  background-color: #333333;
+}
+
+.dark-mode .nav-link,
+.dark-mode .navbar-brand {
+  color: #ffffff !important;
+}
+
+/* Link */
+.dark-mode a {
+  color: #90caf9;
+}
+.dark-mode a:hover {
+  color: #64b5f6;
+}
+
+/* Đường kẻ và border */
+.dark-mode hr,
+.dark-mode .border {
+  border-color: #333 !important;
+}
+
+/* Input / Form */
+.dark-mode .form-control,
+.dark-mode input,
+.dark-mode textarea {
+  background-color: #2a2a2a;
+  color: #ffffff;
+  border-color: #444;
+}
+
+
+/* list group item trong dark mode */
+.dark-mode .list-group-item {
+  background-color: #1f1f1f !important;
+  color: #e0e0e0 !important;
+  border-color: #333 !important;
+}
+
+/* hiệu ứng hover/click */
+.dark-mode .list-group-item-action:hover,
+.dark-mode .list-group-item-action:focus {
+  background-color: #2a2a2a !important;
+  color: #ffffff !important;
+}
+
+/* shadow trong dark nên nhẹ hoặc bỏ */
+.dark-mode .shadow-sm {
+  box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.2) !important;
+}
+
+/* Pagination trong dark mode */
+.dark-mode .pagination .page-link {
+  background-color: #2a2a2a;
+  color: #e0e0e0;
+  border-color: #444;
+}
+
+/* Khi hover hoặc active */
+.dark-mode .pagination .page-link:hover {
+  background-color: #3a3a3a;
+  color: #ffffff;
+  border-color: #666;
+}
+
+/* Trang hiện tại */
+.dark-mode .pagination .active .page-link {
+  background-color: #0069d9;
+  border-color: #0062cc;
+  color: #fff;
+}
+
+/* Nút disabled (ví dụ: Trang trước bị disable ở trang 1) */
+.dark-mode .pagination .disabled .page-link {
+  background-color: #1f1f1f;
+  color: #888;
+  border-color: #333;
+}
+.dark-mode select,
+.dark-mode .form-select {
+  background-color: #2a2a2a;
+  color: #ffffff;
+  border-color: #444;
+}
+
+/* Khi focus */
+.dark-mode select:focus,
+.dark-mode .form-select:focus {
+  background-color: #2a2a2a;
+  color: #ffffff;
+  border-color: #66afe9;
+  box-shadow: 0 0 0 0.2rem rgba(102, 175, 233, 0.25);
+}
+/* Input / Form */
+.dark-mode .form-control,
+.dark-mode input,
+.dark-mode textarea {
+  background-color: #2a2a2a;
+  color: #ffffff;
+  border-color: #444;
+}
+
+/* Placeholder trong dark mode */
+.dark-mode .form-control::placeholder,
+.dark-mode input::placeholder,
+.dark-mode textarea::placeholder {
+  color: #999999;
+  opacity: 1; /* giữ rõ ràng */
+}
+
+/* Focus: click vào input không đổi màu trắng */
+.dark-mode .form-control:focus,
+.dark-mode input:focus,
+.dark-mode textarea:focus {
+  background-color: #2a2a2a;
+  color: #ffffff;
+  border-color: #66afe9;
+  box-shadow: 0 0 0 0.2rem rgba(102, 175, 233, 0.25);
+}

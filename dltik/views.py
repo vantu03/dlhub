@@ -358,3 +358,14 @@ def register(request):
         "labels": labels,
         "recaptcha_site_key": settings.RECAPTCHA_SITE_KEY,
     })
+
+def set_theme(request, mode):
+    allowed_modes = [t["mode"] for t in settings.THEMES]
+    if mode in allowed_modes:
+        request.session["mode"] = mode
+
+    next_url = request.GET.get("next", "home")
+    if not url_has_allowed_host_and_scheme(next_url, allowed_hosts={request.get_host()}) or len(
+            next_url) > 200:
+        next_url = "home"
+    return redirect(next_url)
