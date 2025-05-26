@@ -39,8 +39,9 @@ class Article(models.Model):
     content = RichTextField()
     views = models.PositiveIntegerField(default=0)
     cover_image = models.URLField(blank=True, null=True)
-    show_toc = models.BooleanField(default=True, help_text="Show list automatically if there is title?")
-    show_meta = models.BooleanField(default=True, help_text="Enable if you want to display poster information and creation time")
+    show_toc = models.BooleanField(default=True)
+    show_meta = models.BooleanField(default=True)
+    allow_comments = models.BooleanField(default=True)
     published_at = models.DateTimeField(default=timezone.now)
     is_published = models.BooleanField(default=True)
     author = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='articles')
@@ -113,3 +114,43 @@ class Favorite(models.Model):
 
     class Meta:
         unique_together = ('user', 'article')
+
+class Comment(models.Model):
+    class Status(models.TextChoices):
+        PENDING = 'pending', 'Chờ duyệt'
+        APPROVED = 'approved', 'Đã duyệt'
+        REJECTED = 'rejected', 'Từ chối'
+
+    article = models.ForeignKey('Article', on_delete=models.CASCADE, related_name='comments')
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='comments')
+    content = models.TextField()
+    status = models.CharField(
+        max_length=10,
+        choices=Status.choices,
+        default=Status.PENDING,
+    )
+    reject_reason = models.CharField(
+        max_length=255,
+        blank=True,
+        null=True,
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    moderated_at = models.DateTimeField(blank=True, null=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.user.username} - '{self.article.title}'"
+
+    def approve(self):
+        self.status = self.Status.APPROVED
+        self.reject_reason = ''
+        self.moderated_at = timezone.now()
+        self.save()
+
+    def reject(self, reason):
+        self.status = self.Status.REJECTED
+        self.reject_reason = reason
+        self.moderated_at = timezone.now()
+        self.save()

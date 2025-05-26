@@ -115,6 +115,155 @@
         </footer>
     {% endif %}
 </article>
+
+{% if article.show_meta or comment_page or article.allow_comments %}
+    <section id="comments" class="mt-5 pt-5 border-top">
+        <h2 class="h5 text-primary mb-4">
+            <i class="bi bi-chat-dots me-1"></i> Bình luận ({{ comment_count }})
+        </h2>
+
+        {% if article.allow_comments %}
+            {% if user.is_authenticated %}
+                <form method="post" class="mb-4">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <textarea id="comment-textarea" name="content" class="form-control" rows="2" maxlength="300" placeholder="Viết bình luận..." required></textarea>
+                        <div class="g-recaptcha mt-2" data-sitekey="{{ recaptcha_site_key }}" data-callback="onRecaptchaSuccess"></div>
+
+                        <div class="d-flex justify-content-between align-items-center flex-wrap mt-2">
+                            <button type="submit" class="btn btn-primary btn-sm me-2" name="action" value="send_comment" id="comment-submit-btn" disabled>
+                                <i class="bi bi-send me-1"></i> Gửi bình luận
+                            </button>
+                            <div class="form-text text-muted ms-auto">
+                                <span id="charCount">0</span>/300 ký tự
+                            </div>
+                        </div>
+                    </div>
+                </form>
+                <script>
+                    document.addEventListener("DOMContentLoaded", function () {
+                        let isRecaptchaPassed = false;
+                        const textarea = document.querySelector('textarea[name="content"]');
+                        const charCount = document.getElementById("charCount");
+
+                        textarea.addEventListener("input", function () {
+                            charCount.textContent = textarea.value.length;
+                        });
+
+                        function onRecaptchaSuccess() {
+                            isRecaptchaPassed = true;
+                            checkCanSubmit();
+                        }
+
+                        function checkCanSubmit() {
+                            const content = document.getElementById("comment-textarea").value.trim();
+                            const btn = document.getElementById("comment-submit-btn");
+                            if (content.length > 0 && content.length <= 300 && isRecaptchaPassed) {
+                                btn.disabled = false;
+                            } else {
+                                btn.disabled = true;
+                            }
+                        }
+
+                        document.addEventListener("DOMContentLoaded", function () {
+                            const textarea = document.getElementById("comment-textarea");
+                            const charCount = document.getElementById("charCount");
+
+                            textarea.addEventListener("input", function () {
+                                const len = textarea.value.length;
+                                charCount.textContent = len;
+                                checkCanSubmit();
+                            });
+                        });
+                    });
+                </script>
+            {% else %}
+                <p class="text-muted fst-italic">
+                    <i class="bi bi-box-arrow-in-right me-1"></i>
+                    <a href="{% url 'login' %}?next={{ request.path }}">Đăng nhập</a> để gửi bình luận.
+                </p>
+            {% endif %}
+
+        {% else %}
+            <p class="text-muted fst-italic">
+                <i class="bi bi-ban me-1"></i>
+                Bình luận đã bị tắt cho bài viết này.
+            </p>
+        {% endif %}
+
+        {% if comment_page %}
+            {% for comment in comment_page %}
+                <div class="mb-3 p-3 border rounded bg-light" itemscope itemtype="https://schema.org/Comment">
+                    <div class="d-flex justify-content-between">
+                        <strong itemprop="author">
+                            <i class="bi bi-person-circle me-1"></i>
+                            {{ comment.user.get_full_name|default:comment.user.username }}
+                            {% if comment.user == request.user %}
+                                <i class="bi bi-person-fill-check text-info ms-2" title="Bình luận của bạn"></i>
+                            {% endif %}
+                        </strong>
+
+                        <time itemprop="datePublished" datetime="{{ comment.created_at|date:'c' }}" class="text-muted small">
+                            <i class="bi bi-clock me-1"></i>{{ comment.created_at|date:"d/m/Y H:i" }}
+                        </time>
+                    </div>
+                    <div itemprop="text" class="mt-2">
+                        {{ comment.content|linebreaksbr }}
+                    </div>
+                    {% if comment.user == request.user and comment.status == 'rejected' %}
+                        <p class="text-warning small mt-2 mb-0">
+                            {% if comment.status == 'rejected' %}
+                            <strong class="text-danger">Từ chối:</strong> {{ comment.reject_reason }}
+                            {% endif %}
+                        </p>
+                    {% endif %}
+                </div>
+            {% empty %}
+                <p class="text-muted fst-italic">Chưa có bình luận nào.</p>
+            {% endfor %}
+
+            {% if comment_page.has_other_pages %}
+                <nav class="mt-4" aria-label="Phân trang bình luận">
+                    <ul class="pagination justify-content-center">
+                        {% if comment_page.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link" href="?comment_page={{ comment_page.previous_page_number }}#comments">
+                                    <i class="bi bi-chevron-left"></i>
+                                </a>
+                            </li>
+                        {% else %}
+                            <li class="page-item disabled">
+                                <span class="page-link"><i class="bi bi-chevron-left"></i></span>
+                            </li>
+                        {% endif %}
+
+                        {% for i in comment_page.paginator.page_range %}
+                            {% if comment_page.number == i %}
+                                <li class="page-item active"><span class="page-link">{{ i }}</span></li>
+                            {% else %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?comment_page={{ i }}#comments">{{ i }}</a>
+                                </li>
+                            {% endif %}
+                        {% endfor %}
+
+                        {% if comment_page.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="?comment_page={{ comment_page.next_page_number }}#comments">
+                                    <i class="bi bi-chevron-right"></i>
+                                </a>
+                            </li>
+                        {% else %}
+                            <li class="page-item disabled">
+                                <span class="page-link"><i class="bi bi-chevron-right"></i></span>
+                            </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+            {% endif %}
+        {% endif %}
+    </section>
+{% endif %}
 {% endblock %}
 {% block extra_scripts %}
     <script>
@@ -172,5 +321,6 @@
         });
     });
     </script>
+    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
 
 {% endblock %}

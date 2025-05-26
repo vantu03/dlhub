@@ -153,7 +153,8 @@ def article(request, slug):
         is_favorited = False
 
         if request.method == "POST":
-            if request.POST.get("action") == "toggle_favorite":
+            action = request.POST.get("action")
+            if action == "toggle_favorite":
 
                 if request.user.is_authenticated:
                     fav, created = Favorite.objects.get_or_create(user=request.user, article=article)
@@ -162,13 +163,59 @@ def article(request, slug):
                 else:
                     return redirect(f"{reverse('login')}?next={quote(request.get_full_path())}")
 
+            elif action == "send_comment":
+                if request.user.is_authenticated and article.allow_comments:
+                    content = request.POST.get("content", "").strip()
+                    recaptcha_response = request.POST.get("g-recaptcha-response")
+
+                    if content:
+                        if not content or len(content) < 300:
+
+                            # Xác minh reCAPTCHA
+                            verify_url = 'https://www.google.com/recaptcha/api/siteverify'
+                            payload = {
+                                'secret': settings.RECAPTCHA_SECRET_KEY,
+                                'response': recaptcha_response,
+                            }
+
+                            try:
+                                r = requests.post(verify_url, data=payload)
+                                result = r.json()
+                                if result.get("success"):
+                                    article.comments.create(user=request.user, content=content)
+                                else:
+                                    # Có thể log hoặc hiển thị lỗi
+                                    print("reCAPTCHA failed", result)
+                            except Exception as e:
+                                print("reCAPTCHA error:", str(e))
+                        return redirect(f"{article.get_absolute_url()}#comments")
+
         if request.user.is_authenticated:
             is_favorited = Favorite.objects.filter(user=request.user, article=article).exists()
 
         article.views += 1
         article.save()
 
-        return render(request, 'dltik/article.html', {'article': article, 'is_favorited': is_favorited})
+        #Lấy bình luận
+        if request.user.is_authenticated:
+            comments_qs = article.comments.filter(Q(status='approved') | Q(user=request.user)).distinct()
+        else:
+            comments_qs = article.comments.filter(status='approved')
+
+        comment_count = article.comments.filter(status='approved').count()
+
+
+        paginator = Paginator(comments_qs, 10)
+        page_number = request.GET.get('comment_page')
+        comment_page = paginator.get_page(page_number)
+
+        return render(request, 'dltik/article.html',{
+            'article': article,
+            'is_favorited': is_favorited,
+            'comment_page': comment_page,
+            'comment_count': comment_count,
+            'recaptcha_site_key': settings.RECAPTCHA_SITE_KEY,
+        })
     else:
         return custom_404_view(request, None)
 
