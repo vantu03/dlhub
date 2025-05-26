@@ -1,6 +1,5 @@
 from django.db import models
 from django.contrib.auth.models import User
-from django.utils.text import slugify
 from django.utils import timezone
 from ckeditor.fields import RichTextField
 from django.urls import reverse
@@ -54,8 +53,9 @@ class Article(models.Model):
         return self.title
 
     def save(self, *args, **kwargs):
+        import dltik.utils
         if not self.slug:
-            self.slug = slugify(self.title)
+            self.slug = dltik.utils.slugify(self.title)
         super().save(*args, **kwargs)
 
     def get_tags(self):
@@ -98,8 +98,9 @@ class Page(models.Model):
         return f"{self.name} ({self.format})"
 
     def save(self, *args, **kwargs):
+        import dltik.utils
         if not self.slug:
-            self.slug = slugify(self.name)
+            self.slug = dltik.utils.slugify(self.name)
         super().save(*args, **kwargs)
 
     def get_absolute_url(self):

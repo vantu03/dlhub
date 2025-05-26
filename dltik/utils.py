@@ -1,5 +1,5 @@
 from urllib.parse import urlparse, urlunparse, quote
-import base64, json, hashlib, hmac, threading, uuid, yt_dlp, os, time
+import base64, json, hashlib, hmac, threading, uuid, yt_dlp, os, time, re
 from django.utils import timezone
 from dltik.models import File
 from django.conf import settings
@@ -56,10 +56,6 @@ def download_format(label, fmt, video_url, upload, save, request):
             'quiet': True,
             'noplaylist': True,
             'continuedl': False,
-            'postprocessors': [{
-                'key': 'FFmpegMerger',
-                'preferedformat': 'mp4',
-            }],
             'http_headers': {
                 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
                 'Accept-Language': 'en-US,en;q=0.9',
@@ -171,3 +167,30 @@ def is_valid_email(email: str):
         return True
     except ValidationError:
         return False
+
+def slugify(text):
+    vietnamese_map = {
+        'a': 'áàảãạăắằẳẵặâấầẩẫậ',
+        'A': 'ÁÀẢÃẠĂẮẰẲẴẶÂẤẦẨẪẬ',
+        'd': 'đ',
+        'D': 'Đ',
+        'e': 'éèẻẽẹêếềểễệ',
+        'E': 'ÉÈẺẼẸÊẾỀỂỄỆ',
+        'i': 'íìỉĩị',
+        'I': 'ÍÌỈĨỊ',
+        'o': 'óòỏõọôốồổỗộơớờởỡợ',
+        'O': 'ÓÒỎÕỌÔỐỒỔỖỘƠỚỜỞỠỢ',
+        'u': 'úùủũụưứừửữự',
+        'U': 'ÚÙỦŨỤƯỨỪỬỮỰ',
+        'y': 'ýỳỷỹỵ',
+        'Y': 'ÝỲỶỸỴ'
+    }
+    for non_accented, accented_chars in vietnamese_map.items():
+        for accented_char in accented_chars:
+            text = text.replace(accented_char, non_accented)
+
+    text = text.lower()
+    text = re.sub(r'[^a-z0-9]+', '-', text)  # thay khoảng trắng và ký tự đặc biệt bằng -
+    text = re.sub(r'-{2,}', '-', text)  # gộp nhiều dấu - liền nhau
+    text = text.strip('-')  # xóa dấu - ở đầu/cuối
+    return text
