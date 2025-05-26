@@ -5,7 +5,12 @@ from ckeditor.fields import RichTextField
 from django.urls import reverse
 
 class Upload(models.Model):
+    class MediaType(models.TextChoices):
+        VIDEO = 'video', 'Video'
+        PHOTO = 'photo', 'Photo'
+
     source_url = models.URLField()
+    media_type = models.CharField(max_length=10, choices=MediaType.choices)
     created_at = models.DateTimeField(auto_now_add=True)
     title = models.CharField(max_length=255)
     thumbnail = models.URLField(blank=True, null=True)

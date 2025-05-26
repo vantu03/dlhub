@@ -117,7 +117,7 @@
 </article>
 
 {% if article.show_meta or comment_page or article.allow_comments %}
-    <section id="comments" class="mt-5 pt-5 border-top">
+    <section id="comments" class="bg-white rounded shadow-sm p-4 mt-2">
         <h2 class="h5 text-primary mb-4">
             <i class="bi bi-chat-dots me-1"></i> Bình luận ({{ comment_count }})
         </h2>
@@ -141,39 +141,37 @@
                     </div>
                 </form>
                 <script>
+                    let isRecaptchaPassed = false;
+                    const textarea = document.querySelector('textarea[name="content"]');
+                    const charCount = document.getElementById("charCount");
+
+                    textarea.addEventListener("input", function () {
+                        charCount.textContent = textarea.value.length;
+                    });
+
+                    function onRecaptchaSuccess() {
+                        isRecaptchaPassed = true;
+                        checkCanSubmit();
+                    }
+
+                    function checkCanSubmit() {
+                        const content = document.getElementById("comment-textarea").value.trim();
+                        const btn = document.getElementById("comment-submit-btn");
+                        if (content.length > 0 && content.length <= 300 && isRecaptchaPassed) {
+                            btn.disabled = false;
+                        } else {
+                            btn.disabled = true;
+                        }
+                    }
+
                     document.addEventListener("DOMContentLoaded", function () {
-                        let isRecaptchaPassed = false;
-                        const textarea = document.querySelector('textarea[name="content"]');
+                        const textarea = document.getElementById("comment-textarea");
                         const charCount = document.getElementById("charCount");
 
                         textarea.addEventListener("input", function () {
-                            charCount.textContent = textarea.value.length;
-                        });
-
-                        function onRecaptchaSuccess() {
-                            isRecaptchaPassed = true;
+                            const len = textarea.value.length;
+                            charCount.textContent = len;
                             checkCanSubmit();
-                        }
-
-                        function checkCanSubmit() {
-                            const content = document.getElementById("comment-textarea").value.trim();
-                            const btn = document.getElementById("comment-submit-btn");
-                            if (content.length > 0 && content.length <= 300 && isRecaptchaPassed) {
-                                btn.disabled = false;
-                            } else {
-                                btn.disabled = true;
-                            }
-                        }
-
-                        document.addEventListener("DOMContentLoaded", function () {
-                            const textarea = document.getElementById("comment-textarea");
-                            const charCount = document.getElementById("charCount");
-
-                            textarea.addEventListener("input", function () {
-                                const len = textarea.value.length;
-                                charCount.textContent = len;
-                                checkCanSubmit();
-                            });
                         });
                     });
                 </script>

@@ -3,7 +3,7 @@ from .models import Article, Upload, File, PinnedArticle, Tag, Page, Comment, Fa
 
 @admin.register(Upload)
 class UploadAdmin(admin.ModelAdmin):
-    list_display = ("title", "source_url", "created_at")
+    list_display = ("title", "source_url", "media_type", "created_at")
     search_fields = ("title", "source_url")
 
 @admin.register(File)

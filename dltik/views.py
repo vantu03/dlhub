@@ -15,6 +15,7 @@ from django.contrib.auth import authenticate, login as auth_login, logout as aut
 from django.conf import settings
 from urllib.parse import quote
 from django.utils.http import url_has_allowed_host_and_scheme
+from vt_dltik import DLHub
 
 def ads(request):
     return render(request, 'dltik/ads.txt')
@@ -44,35 +45,58 @@ def perform(request):
         if decoded.get('ok'):
             match decoded.get('decoded', {}).get('type'):
                 case 0:
-                    video_url = utils.strip_query_params(decoded.get('decoded', {}).get('code'))
+                    video_url = decoded.get('decoded', {}).get('code')
+                    type1 = decoded.get('decoded', {}).get('type1')
                     if video_url:
 
-                        formats = {
-                            'Download <i class="bi bi-badge-hd-fill"></i>': 'best',
-                            'Download': 'best[height<=720]',
-                        }
+                        formats = []
+                        threads = []
 
-                        fmt_result = utils.get_formats(video_url)
-                        for fmt in fmt_result.get('formats', []):
-                            if "hd" in fmt['format_id'] and False:
-                                formats["Download "+ fmt['format_id']] = fmt['format_id']
-                            print(f"{fmt['format_id']} - {fmt.get('height')}")
+                        if type1 == 0:
+                            dl = DLHub(video_url, download=False)
+                            info = dl.run()
+                            if info["success"] and info["media_type"] == "video":
+                                formats = [
+                                    ("Download <i class='bi bi-badge-hd-fill'></i>", 'best', True),
+                                    ("Download", 'best[height<=720]', True),
+                                ]
+
+                        else:
+
+                            info = utils.get_formats(video_url)
+                            info["media_type"] = 'video'
+
+                            formats = [
+                                ("Download <i class='bi bi-badge-hd-fill'></i>", 'best', False),
+                                ("Download", 'best[height<=720]', False),
+                            ]
+
+                            for fmt in info.get('formats', []):
+                                if "hd" in fmt['format_id'] and False:
+                                    formats["Download "+ fmt['format_id']] = fmt['format_id']
+                                print(f"{fmt['format_id']} - {fmt.get('height')}")
 
                         upload = Upload.objects.create(
                             source_url=video_url,
-                            title=fmt_result.get('title', ''),
-                            thumbnail=fmt_result.get('thumbnail', ''),
+                            title=info.get('title', ''),
+                            thumbnail=info.get('thumbnail', ''),
+                            media_type=info["media_type"],
                         )
 
-                        save = decoded.get('decoded', {}).get('type1') == 0
-                        threads = []
-                        for label, fmt in formats.items():
+                        if info["media_type"] == "photo":
+                            for item in info["media"]:
+                                upload.files.create(label=f"Ảnh {item['index']}", url=item["url"])
+
+                        for label, fmt, save in formats:
                             t = threading.Thread(
                                 target=utils.download_format,
                                 args=(label, fmt, video_url, upload, save, request)
                             )
                             t.start()
                             threads.append(t)
+
+                        for t in threads:
+                            t.join()
 
                         # Chờ các thread tải xong
                         for t in threads:
@@ -81,6 +105,7 @@ def perform(request):
                         data = {
                             'title': upload.title,
                             'thumbnail': upload.thumbnail,
+                            'media_type': upload.media_type,
                             'urls': [{f.label: f.url} for f in upload.files.all()]
                         }
                         utils.encode_data(data)

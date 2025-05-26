@@ -19,10 +19,6 @@ def encode_token(data, ts=None) -> str:
     payload = {"data": data, "ts": ts, "sig": sig}
     return base64.urlsafe_b64encode(json.dumps(payload).encode()).decode()
 
-def strip_query_params(url):
-    parsed = urlparse(url)
-    return urlunparse(parsed._replace(query="", fragment=""))
-
 def decode_token(encoded_token):
     try:
         decoded_bytes = base64.urlsafe_b64decode(encoded_token)
@@ -69,7 +65,7 @@ def download_format(label, fmt, video_url, upload, save, request):
             else:
                 path = info.get('url', '')
 
-            File.objects.create(upload=upload, label=label, url=path)
+            upload.files.create(label=label, url=path)
 
 
     except Exception as e:
@@ -194,3 +190,10 @@ def slugify(text):
     text = re.sub(r'-{2,}', '-', text)  # gộp nhiều dấu - liền nhau
     text = text.strip('-')  # xóa dấu - ở đầu/cuối
     return text
+
+def detect_media_type(info):
+    if 'formats' in info and any(f.get('vcodec') not in (None, 'none') for f in info['formats']):
+        return 'video'
+    elif 'images' in info or info.get('media_type') == 'photo':
+        return 'photo'
+    return 'unknown'

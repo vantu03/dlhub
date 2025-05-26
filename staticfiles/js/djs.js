@@ -99,6 +99,14 @@ document.getElementById("download-btn").addEventListener("click", function () {
                         .then(token => downloadVideo(token))
                         .catch(err => showMessage("danger", err.message));
                     break;
+                case "douyin.com":
+                case "www.douyin.com":
+                case "v.douyin.com":
+                    encodeDownloadInfo(rawUrl, 0)
+                        .then(token => downloadVideo(token))
+                        .catch(err => showMessage("danger", err.message));
+                    break;
+
 
                 default:
                     showMessage("warning", "Không hỗ trợ trang: " + host);
@@ -159,6 +167,7 @@ function downloadVideo(encoded) {
     const title = document.getElementById("video-title");
     const alert = document.getElementById("alert-container");
     const buttons = document.getElementById("download-buttons");
+    const photoPreview = document.getElementById("photo-preview");
 
     thumbnail.src = "";
     title.innerText = "";
@@ -181,18 +190,57 @@ function downloadVideo(encoded) {
 
             thumbnail.src = data.thumbnail;
             title.innerText = data.title || "Không có tiêu đề";
+            photoPreview.innerHTML = "";
 
-            data.urls.forEach(item => {
-                const label = Object.keys(item)[0];
-                const url = item[label];
+            if (data.media_type === "photo") {
+                data.urls.forEach(item => {
+                    const label = Object.keys(item)[0];
+                    const url = item[label];
 
-                const btn = document.createElement("a");
-                btn.href = url;
-                btn.download = "";
-                btn.className = "btn btn-primary w-100 d-flex gap-2 mb-2";
-                btn.innerHTML = `<i class="bi bi-download"></i>${label}`;
-                buttons.appendChild(btn);
-            });
+                    // Hiển thị ảnh lớn bên dưới
+                    const col = document.createElement("div");
+                    col.className = "col";
+
+                    const card = document.createElement("div");
+                    card.className = "card shadow-sm";
+
+                    const img = document.createElement("img");
+                    img.src = url;
+                    img.alt = label;
+                    img.className = "card-img-top rounded";
+                    img.className = "card-img-top rounded";
+                    img.style.height = "300px";
+                    img.style.objectFit = "cover";
+                    img.style.width = "100%";
+
+                    const cardBody = document.createElement("div");
+                    cardBody.className = "card-body text-center";
+
+                    const btn = document.createElement("a");
+                    btn.href = url;
+                    btn.download = "";
+                    btn.className = "btn btn-outline-primary w-100";
+                    btn.innerHTML = `<i class="bi bi-download"></i> ${label}`;
+
+                    cardBody.appendChild(btn);
+                    card.appendChild(img);
+                    card.appendChild(cardBody);
+                    col.appendChild(card);
+                    photoPreview.appendChild(col);
+                });
+            } else {
+                data.urls.forEach(item => {
+                    const label = Object.keys(item)[0];
+                    const url = item[label];
+
+                    const btn = document.createElement("a");
+                    btn.href = url;
+                    btn.download = "";
+                    btn.className = "btn btn-primary w-100 d-flex gap-2 mb-2";
+                    btn.innerHTML = `<i class="bi bi-download"></i>${label}`;
+                    buttons.appendChild(btn);
+                });
+            }
             completeFakeProgress();
             hideBlur();
             showMessage("success", "Video sẵn sàng để tải về.");
