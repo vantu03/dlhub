@@ -39,7 +39,7 @@
     {% if request.GET %}
       <meta name="robots" content="noindex, follow">
     {% endif %}
-    <link rel="stylesheet" href="{% static 'css/thames.css' %}">
+    <link rel="stylesheet" href="{% static 'css/thames.css' %}?v2">
 
     <!-- Service Worker -->
     <script>
@@ -211,7 +211,7 @@
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
-    <script src="{% static 'js/script.js' %}"></script>
+    <script src="{% static 'js/script.js' %}?v2"></script>
     {% block extra_scripts %}
     {% endblock %}
 </body>
