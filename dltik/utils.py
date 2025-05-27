@@ -1,7 +1,6 @@
-from urllib.parse import urlparse, urlunparse, quote
+from urllib.parse import urlparse, quote
 import base64, json, hashlib, hmac, threading, uuid, yt_dlp, os, time, re
 from django.utils import timezone
-from dltik.models import File
 from django.conf import settings
 from django.core.validators import validate_email
 from django.core.exceptions import ValidationError
@@ -65,7 +64,7 @@ def download_format(label, fmt, video_url, upload, save, request):
             else:
                 path = info.get('url', '')
 
-            upload.files.create(label=label, url=path)
+            upload.files.create(label=label, url=path, filename=f"{filename}.{ext}")
 
 
     except Exception as e:
@@ -98,13 +97,11 @@ def encode_data(data):
     for item in data['urls']:
         for label, url in item.items():
             path = urlparse(url).path
-            filename = path.split('/')[-1]
 
             token = encode_token(
                 data={
                     "code": quote(url, safe=''),
-                    "type": 1,
-                    "filename": filename
+                    "type": 1
                 },
                 ts=-1
             )

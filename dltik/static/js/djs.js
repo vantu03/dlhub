@@ -207,6 +207,7 @@ function downloadVideo(encoded) {
                     const img = document.createElement("img");
                     img.src = url;
                     img.alt = label;
+                    img.loading = 'lazy';
                     img.className = "card-img-top rounded";
                     img.className = "card-img-top rounded";
                     img.style.height = "300px";
@@ -228,6 +229,10 @@ function downloadVideo(encoded) {
                     col.appendChild(card);
                     photoPreview.appendChild(col);
                 });
+                setTimeout(() => {
+                    photoPreview.scrollIntoView({ behavior: "smooth" });
+                }, 100);
+
             } else {
                 data.urls.forEach(item => {
                     const label = Object.keys(item)[0];
@@ -284,5 +289,4 @@ function completeFakeProgress() {
     const wrapper = document.getElementById("progress-wrapper");
 
     wrapper.classList.add("d-none");
-    console.log('đã dừng lại');
 }

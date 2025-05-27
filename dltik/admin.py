@@ -3,17 +3,23 @@ from .models import Article, Upload, File, PinnedArticle, Tag, Page, Comment, Fa
 
 @admin.register(Upload)
 class UploadAdmin(admin.ModelAdmin):
-    list_display = ("title", "source_url", "media_type", "created_at")
+    list_display = ("title", "media_type", "source_url", "file_count", "created_at")
     search_fields = ("title", "source_url")
+
+    def file_count(self, obj):
+        return obj.files.count()
+    file_count.short_description = "Số file"
 
 @admin.register(File)
 class FileAdmin(admin.ModelAdmin):
-    list_display = ("label", "url", "upload", "created_at")
+    list_display = ("label", "filename", "upload", "download_count", "created_at")
     search_fields = ("label", "url")
+    list_filter = ("created_at", "upload")
 
 @admin.register(Article)
 class ArticleAdmin(admin.ModelAdmin):
-    list_display = ("title", "author", "published_at", "is_published")
+    list_editable = ("is_published",)
+    list_display = ("title", "author", "published_at", "is_published", "show_toc")
     search_fields = ("title", "summary", "tags")
     list_filter = ("is_published", "published_at")
     prepopulated_fields = {"slug": ("title",)}

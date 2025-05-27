@@ -10,6 +10,7 @@ class Upload(models.Model):
         PHOTO = 'photo', 'Photo'
 
     source_url = models.URLField()
+    final_url = models.URLField(blank=True, null=True)
     media_type = models.CharField(max_length=10, choices=MediaType.choices)
     created_at = models.DateTimeField(auto_now_add=True)
     title = models.CharField(max_length=255)
@@ -22,10 +23,12 @@ class File(models.Model):
     upload = models.ForeignKey(Upload, related_name='files', on_delete=models.CASCADE)
     url = models.URLField(max_length=2000)
     label = models.CharField(max_length=100)
+    filename = models.CharField(max_length=255, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
+    download_count = models.IntegerField(default=0)
 
     def __str__(self):
-        return f"{self.label} - {self.url}"
+        return f"{self.filename}"
 
 class Tag(models.Model):
     name = models.CharField(max_length=100, unique=True)

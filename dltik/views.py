@@ -1,8 +1,8 @@
 from django.http import JsonResponse
 from django.shortcuts import render
-from .models import Article, User, Upload, PinnedArticle, Page, Favorite
+from .models import Article, User, Upload, PinnedArticle, Page, Favorite, File
 from dltik import utils
-import json, time, requests, threading, re
+import json, requests, threading, re, uuid
 from django.http import StreamingHttpResponse, HttpResponse
 from django.template import Template, Context
 from django.contrib.sitemaps import Sitemap
@@ -65,6 +65,7 @@ def perform(request):
 
                             info = utils.get_formats(video_url)
                             info["media_type"] = 'video'
+                            info["final_url"] = info.get('url', '')
 
                             formats = [
                                 ("Download <i class='bi bi-badge-hd-fill'></i>", 'best', False),
@@ -78,6 +79,7 @@ def perform(request):
 
                         upload = Upload.objects.create(
                             source_url=video_url,
+                            final_url=info.get('final_url', ''),
                             title=info.get('title', ''),
                             thumbnail=info.get('thumbnail', ''),
                             media_type=info["media_type"],
@@ -85,7 +87,7 @@ def perform(request):
 
                         if info["media_type"] == "photo":
                             for item in info["media"]:
-                                upload.files.create(label=f"Ảnh {item['index']}", url=item["url"])
+                                upload.files.create(label=f"Ảnh {item['index']}", url=item["url"], filename=f"dlhub_{uuid.uuid4()}.jpg")
 
                         for label, fmt, save in formats:
                             t = threading.Thread(
@@ -114,27 +116,37 @@ def perform(request):
 
                 case 1:
                     video_url = decoded.get('decoded', {}).get('code')
-                    filename = decoded.get('decoded', {}).get('filename')
 
-                    try:
-                        r = requests.get(unquote(video_url), headers={
-                            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
-                            'Accept-Language': 'en-US,en;q=0.9',
-                        }, stream=True, timeout=10)
-                        r.raise_for_status()
-                    except requests.RequestException:
-                        return JsonResponse({'error': 'Không thể tải video từ URL: '+ unquote(video_url) + ' filename: '+ filename}, status=400)
+                    real_url = unquote(video_url)
+                    file = File.objects.filter(url=real_url).first()
 
-                    content_type = r.headers.get('Content-Type', 'application/octet-stream')
-                    content_length = r.headers.get('Content-Length')
+                    if file:
+                        file.download_count = (file.download_count + 1) if file.download_count > 1 else 1
+                        file.save()
 
-                    response = StreamingHttpResponse(r.iter_content(8192), content_type=content_type)
-                    response['Content-Disposition'] = f'attachment; filename="{filename}"'
+                        try:
+                            r = requests.get(real_url, headers={
+                                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
+                                'Accept-Language': 'en-US,en;q=0.9',
+                            }, stream=True, timeout=10)
+                            r.raise_for_status()
+                        except requests.RequestException:
+                            return JsonResponse({'error': 'Không thể tải video từ URL'}, status=400)
 
-                    if content_length:
-                        response['Content-Length'] = content_length
+                        content_type = r.headers.get('Content-Type', 'application/octet-stream')
+                        content_length = r.headers.get('Content-Length')
 
-                    return response
+                        response = StreamingHttpResponse(r.iter_content(8192), content_type=content_type)
+                        response['Content-Disposition'] = f'attachment; filename="{file.filename}"'
+
+                        if content_length:
+                            response['Content-Length'] = content_length
+
+                        return response
+
+                    else:
+                        return JsonResponse({'error': 'Không thể tải video từ URL'}, status=400)
+
 
         else:
             return JsonResponse({'error': 'Token lỗi'+ decoded.get('msg', '-1')}, status=400)
