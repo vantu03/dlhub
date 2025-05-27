@@ -17,7 +17,6 @@ urlpatterns = [
     path("user/login/", views.login, name="login"),
     path("user/logout/", views.logout, name="logout"),
     path("user/register/", views.register, name="register"),
-    path("set-theme/<str:mode>/", views.set_theme, name="set_theme")
 
 ]
 
