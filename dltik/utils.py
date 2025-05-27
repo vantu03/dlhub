@@ -41,10 +41,19 @@ def decode_token(encoded_token):
     except Exception as e:
         return {'error': 3, 'msg': str(e)}
 
+def parse_cookie_string(cookie_str):
+    cookies = {}
+    for pair in cookie_str.split(';'):
+        if '=' in pair:
+            key, value = pair.strip().split('=', 1)
+            cookies[key] = value
+    return cookies
+
 def download_format(label, fmt, video_url, upload, save, request):
     try:
         filename = f"dlhub_{uuid.uuid4()}"
         filepath = str(settings.BASE_DIR / 'media' / 'videos' / f'{filename}')
+
         with yt_dlp.YoutubeDL({
             'outtmpl': f'{filepath}.%(ext)s',
             'format': fmt,
@@ -64,7 +73,7 @@ def download_format(label, fmt, video_url, upload, save, request):
             else:
                 path = info.get('url', '')
 
-            upload.files.create(label=label, url=path, filename=f"{filename}.{ext}")
+            upload.files.create(label=label, url=path, filename=f"{filename}.{ext}", type='video', cookies=parse_cookie_string(info.get("cookies", '')),)
 
 
     except Exception as e:
@@ -94,21 +103,25 @@ def get_base_url(request) -> str:
 def encode_data(data):
     new_urls = []
 
-    for item in data['urls']:
-        for label, url in item.items():
-            path = urlparse(url).path
-
-            token = encode_token(
-                data={
-                    "code": quote(url, safe=''),
-                    "type": 1
-                },
-                ts=-1
-            )
-            encoded_url = f"/perform?token={quote(token)}"
-            new_urls.append({label: encoded_url})
+    for item in data.get('urls', []):
+        url = item['url']
+        label = item['label']
+        token = encode_token(
+            data={
+                "code": quote(url, safe=''),
+                "type": 1
+            },
+            ts=-1
+        )
+        encoded_url = f"/perform?token={quote(token)}"
+        new_urls.append({
+            'label': label,
+            'url': encoded_url,
+            'type': item.get('type', '')
+        })
 
     data['urls'] = new_urls
+
 
 def clean_expired_data(timeout_seconds=300):
     print('[Cleanup] Bắt đầu dọn dữ liệu quá hạn...')

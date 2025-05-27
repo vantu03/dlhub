@@ -15,7 +15,9 @@ from django.contrib.auth import authenticate, login as auth_login, logout as aut
 from django.conf import settings
 from urllib.parse import quote
 from django.utils.http import url_has_allowed_host_and_scheme
-from vt_dltik import DLHub
+from vt_dlhub import DLHub
+from bs4 import BeautifulSoup
+from requests.utils import cookiejar_from_dict
 
 def ads(request):
     return render(request, 'dltik/ads.txt')
@@ -34,6 +36,7 @@ def generate_token_view(request):
         return JsonResponse({"error": str(e)}, status=400)
 
 def home(request):
+    print(cookiejar_from_dict(request.COOKIES))
     pinned_articles = PinnedArticle.objects.select_related('article')[:5]
     utils.start_updater_once()
     return render(request, 'dltik/home.html', {'pinned_articles': pinned_articles})
@@ -53,13 +56,11 @@ def perform(request):
                         threads = []
 
                         if type1 == 0:
-                            dl = DLHub(video_url, download=False)
-                            info = dl.run()
-                            if info["success"] and info["media_type"] == "video":
-                                formats = [
-                                    ("Download <i class='bi bi-badge-hd-fill'></i>", 'best', True),
-                                    ("Download", 'best[height<=720]', True),
-                                ]
+                            dl = DLHub(video_url, headers={
+                                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
+                                'Accept-Language': 'en-US,en;q=0.9',
+                            })
+                            info = dl.run(download=False)
 
                         else:
 
@@ -82,12 +83,16 @@ def perform(request):
                             final_url=info.get('final_url', ''),
                             title=info.get('title', ''),
                             thumbnail=info.get('thumbnail', ''),
-                            media_type=info["media_type"],
                         )
 
-                        if info["media_type"] == "photo":
-                            for item in info["media"]:
-                                upload.files.create(label=f"Ảnh {item['index']}", url=item["url"], filename=f"dlhub_{uuid.uuid4()}.jpg")
+                        for i, item in enumerate(info.get("media", []), start=1):
+                            upload.files.create(
+                                label=(f"Ảnh {i}" if item['type'] == 'photo' else "Download <i class='bi bi-badge-hd-fill'></i>"),
+                                url=item["url"],
+                                filename=item['filename'],
+                                type=item['type'],
+                                cookies=item.get('cookies', {})
+                            )
 
                         for label, fmt, save in formats:
                             t = threading.Thread(
@@ -107,8 +112,14 @@ def perform(request):
                         data = {
                             'title': upload.title,
                             'thumbnail': upload.thumbnail,
-                            'media_type': upload.media_type,
-                            'urls': [{f.label: f.url} for f in upload.files.all()]
+                            'urls': [
+                                {
+                                    'label': f.label,
+                                    'url': f.url,
+                                    'type': f.type,
+                                }
+                                for f in upload.files.all()
+                            ]
                         }
                         utils.encode_data(data)
                         return JsonResponse({'success': True, 'data': data})
@@ -121,14 +132,15 @@ def perform(request):
                     file = File.objects.filter(url=real_url).first()
 
                     if file:
-                        file.download_count = (file.download_count + 1) if file.download_count > 1 else 1
+                        file.download_count = file.download_count + 1
                         file.save()
-
+                        print(file.cookies)
+                        print(file.url)
                         try:
                             r = requests.get(real_url, headers={
                                 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
                                 'Accept-Language': 'en-US,en;q=0.9',
-                            }, stream=True, timeout=10)
+                            }, cookies=file.cookies, stream=True, timeout=10)
                             r.raise_for_status()
                         except requests.RequestException:
                             return JsonResponse({'error': 'Không thể tải video từ URL'}, status=400)

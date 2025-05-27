@@ -5,13 +5,9 @@ from ckeditor.fields import RichTextField
 from django.urls import reverse
 
 class Upload(models.Model):
-    class MediaType(models.TextChoices):
-        VIDEO = 'video', 'Video'
-        PHOTO = 'photo', 'Photo'
 
     source_url = models.URLField()
     final_url = models.URLField(blank=True, null=True)
-    media_type = models.CharField(max_length=10, choices=MediaType.choices)
     created_at = models.DateTimeField(auto_now_add=True)
     title = models.CharField(max_length=255)
     thumbnail = models.URLField(blank=True, null=True)
@@ -20,10 +16,16 @@ class Upload(models.Model):
         return f"Upload: {self.title}"
 
 class File(models.Model):
+    class Type(models.TextChoices):
+        VIDEO = 'video', 'Video'
+        PHOTO = 'photo', 'Photo'
+
     upload = models.ForeignKey(Upload, related_name='files', on_delete=models.CASCADE)
     url = models.URLField(max_length=2000)
+    type = models.CharField(max_length=10, choices=Type.choices)
     label = models.CharField(max_length=100)
     filename = models.CharField(max_length=255, blank=True)
+    cookies = models.JSONField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     download_count = models.IntegerField(default=0)
 

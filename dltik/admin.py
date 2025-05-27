@@ -3,7 +3,7 @@ from .models import Article, Upload, File, PinnedArticle, Tag, Page, Comment, Fa
 
 @admin.register(Upload)
 class UploadAdmin(admin.ModelAdmin):
-    list_display = ("title", "media_type", "source_url", "file_count", "created_at")
+    list_display = ("title", "source_url", "file_count", "created_at")
     search_fields = ("title", "source_url")
 
     def file_count(self, obj):
@@ -12,7 +12,7 @@ class UploadAdmin(admin.ModelAdmin):
 
 @admin.register(File)
 class FileAdmin(admin.ModelAdmin):
-    list_display = ("label", "filename", "upload", "download_count", "created_at")
+    list_display = ("label", "filename", "upload", "type", "download_count", "created_at")
     search_fields = ("label", "url")
     list_filter = ("created_at", "upload")
 

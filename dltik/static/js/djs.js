@@ -192,12 +192,15 @@ function downloadVideo(encoded) {
             title.innerText = data.title || "Không có tiêu đề";
             photoPreview.innerHTML = "";
 
-            if (data.media_type === "photo") {
-                data.urls.forEach(item => {
-                    const label = Object.keys(item)[0];
-                    const url = item[label];
-
-                    // Hiển thị ảnh lớn bên dưới
+            data.urls.forEach(item => {
+                if (item.type === "video") {
+                    const btn = document.createElement("a");
+                    btn.href = item.url;
+                    btn.download = "";
+                    btn.className = "btn btn-primary w-100 d-flex gap-2 mb-2";
+                    btn.innerHTML = `<i class="bi bi-download"></i>${item.label}`;
+                    buttons.appendChild(btn);
+                } else if (item.type === "photo") {
                     const col = document.createElement("div");
                     col.className = "col";
 
@@ -205,10 +208,9 @@ function downloadVideo(encoded) {
                     card.className = "card shadow-sm";
 
                     const img = document.createElement("img");
-                    img.src = url;
-                    img.alt = label;
+                    img.src = item.url;
+                    img.alt = item.label;
                     img.loading = 'lazy';
-                    img.className = "card-img-top rounded";
                     img.className = "card-img-top rounded";
                     img.style.height = "300px";
                     img.style.objectFit = "cover";
@@ -218,34 +220,27 @@ function downloadVideo(encoded) {
                     cardBody.className = "card-body text-center";
 
                     const btn = document.createElement("a");
-                    btn.href = url;
+                    btn.href = item.url;
                     btn.download = "";
                     btn.className = "btn btn-outline-primary w-100";
-                    btn.innerHTML = `<i class="bi bi-download"></i> ${label}`;
+                    btn.innerHTML = `<i class="bi bi-download"></i> ${item.label}`;
 
                     cardBody.appendChild(btn);
                     card.appendChild(img);
                     card.appendChild(cardBody);
                     col.appendChild(card);
                     photoPreview.appendChild(col);
-                });
+                }
+            });
+
+            const hasPhoto = data.urls.some(item => item.type === "photo");
+
+            if (hasPhoto) {
                 setTimeout(() => {
                     photoPreview.scrollIntoView({ behavior: "smooth" });
                 }, 100);
-
-            } else {
-                data.urls.forEach(item => {
-                    const label = Object.keys(item)[0];
-                    const url = item[label];
-
-                    const btn = document.createElement("a");
-                    btn.href = url;
-                    btn.download = "";
-                    btn.className = "btn btn-primary w-100 d-flex gap-2 mb-2";
-                    btn.innerHTML = `<i class="bi bi-download"></i>${label}`;
-                    buttons.appendChild(btn);
-                });
             }
+
             completeFakeProgress();
             hideBlur();
             showMessage("success", "Video sẵn sàng để tải về.");
