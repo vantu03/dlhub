@@ -57,28 +57,37 @@
     <div id="alert-container" class="mt-5"></div>
 
     <div class="container d-none" id="preview-container">
-        <div class="d-flex flex-column flex-md-row align-items-start justify-content-between bg-light rounded p-3 shadow-sm mb-4">
-          <!-- Bên trái: thumbnail + title -->
-          <div class="d-flex align-items-start gap-3 text-start">
-            <img id="video-thumbnail" class="rounded" style="width: 120px; height: 120px; object-fit: cover;" alt="Thumbnail">
-            <div>
-              <h6 id="video-title" class="mb-1 fw-bold">Tiêu đề video</h6>
-              <small class="text-muted">TikTok</small>
-            </div>
-          </div>
+        <div class="d-flex flex-wrap align-items-start justify-content-between bg-light rounded p-3 shadow-sm mb-4 gap-3 text-start">
+            <!-- Bên trái: thumbnail + title -->
+            <div class="d-flex align-items-start gap-3 flex-grow-1 min-w-0">
+                <img id="video-thumbnail" class="rounded"
+                     style="width: 120px; height: 120px; object-fit: cover;" alt="Thumbnail">
 
-          <!-- Bên phải: nút tải -->
-            <div class="d-flex flex-column gap-2 mt-md-0 mt-3">
-                <div id="download-buttons">
-                <!-- JS gắn nút tại đây -->
+                <!-- Bọc trong một div có min-width và overflow đúng -->
+                <div class="flex-grow-1 min-w-0">
+                    <h6 id="video-title"
+                        class="mb-1 fw-bold"
+                        style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
+                        Tiêu đề video dài quá sẽ được ngắt sau 2 dòng, phần còn lại bị ẩn.
+                    </h6>
+
+                    <small class="text-muted">TikTok</small>
                 </div>
+            </div>
 
+
+            <!-- Bên phải: nút tải -->
+            <div class="d-flex flex-column gap-2 flex-shrink-0">
+                <div id="download-buttons">
+                    <!-- JS gắn nút tại đây -->
+                </div>
                 <a href="" class="btn btn-success d-flex align-items-start justify-content-start gap-2">
                     <i class="bi bi-plus-circle"></i>
                     Tải video khác
                 </a>
             </div>
         </div>
+
         <div id="photo-preview" class="row row-cols-1 row-cols-md-3 g-4 mb-4"></div>
     </div>
 
@@ -144,6 +153,6 @@
 </div>
 {% endblock %}
 {% block extra_scripts %}
-<script src="{% static 'js/djs.js' %}?v5"></script>
+<script src="{% static 'js/djs.js' %}?v6"></script>
 <script src="https://cdn.jsdelivr.net/npm/linkifyjs@3.0.3/dist/linkify.min.js"></script>
 {% endblock %}

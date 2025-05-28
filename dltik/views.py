@@ -86,8 +86,18 @@ def perform(request):
                         )
 
                         for i, item in enumerate(info.get("media", []), start=1):
+                            if item['type'] == 'video':
+                                label = "Download <i class='bi bi-badge-hd-fill'></i>"
+                            elif item['type'] == 'audio':
+                                print('CÓ AUDIO')
+                                label = "Download <i class='bi bi-music-note-beamed'></i>"
+                            elif item['type'] == 'video':
+                                label = f"Ảnh {i}"
+                            else:
+                                label = "Download"
+
                             upload.files.create(
-                                label=(f"Ảnh {i}" if item['type'] == 'photo' else "Download <i class='bi bi-badge-hd-fill'></i>"),
+                                label=label,
                                 url=item["url"],
                                 filename=item['filename'],
                                 type=item['type'],
