@@ -223,7 +223,7 @@ function downloadVideo(encoded) {
                     btn.href = item.url;
                     btn.download = "";
                     btn.className = "btn btn-outline-primary w-100";
-                    btn.innerHTML = `<i class="bi bi-download"></i> ${label}`;
+                    btn.innerHTML = `<i class="bi bi-download"></i> ${item.label}`;
 
                     cardBody.appendChild(btn);
                     card.appendChild(img);
