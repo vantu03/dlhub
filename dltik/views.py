@@ -38,7 +38,6 @@ def generate_token_view(request):
 def home(request):
     print(cookiejar_from_dict(request.COOKIES))
     pinned_articles = PinnedArticle.objects.select_related('article')[:5]
-    utils.start_updater_once()
     return render(request, 'dltik/home.html', {'pinned_articles': pinned_articles})
 
 def perform(request):
@@ -54,18 +53,17 @@ def perform(request):
 
                         formats = []
                         threads = []
+                        print('dang tai vui long cho')
 
                         if type1 == 0:
-                            dl = DLHub(video_url, headers={
-                                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
-                                'Accept-Language': 'en-US,en;q=0.9',
-                            })
+                            dl = DLHub(video_url)
                             info = dl.run(download=False)
+                            print(info)
+                            info["thumbnail"] = info.get('cover', '')
 
                         else:
 
                             info = utils.get_formats(video_url)
-                            info["media_type"] = 'video'
                             info["final_url"] = info.get('url', '')
 
                             formats = [
@@ -88,10 +86,9 @@ def perform(request):
                         for i, item in enumerate(info.get("media", []), start=1):
                             if item['type'] == 'video':
                                 label = "Download <i class='bi bi-badge-hd-fill'></i>"
-                            elif item['type'] == 'audio':
-                                print('CÓ AUDIO')
+                            elif item['type'] == 'music':
                                 label = "Download <i class='bi bi-music-note-beamed'></i>"
-                            elif item['type'] == 'video':
+                            elif item['type'] == 'image':
                                 label = f"Ảnh {i}"
                             else:
                                 label = "Download"
@@ -112,10 +109,6 @@ def perform(request):
                             t.start()
                             threads.append(t)
 
-                        for t in threads:
-                            t.join()
-
-                        # Chờ các thread tải xong
                         for t in threads:
                             t.join()
 

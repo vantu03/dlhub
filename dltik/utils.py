@@ -122,51 +122,6 @@ def encode_data(data):
 
     data['urls'] = new_urls
 
-
-def clean_expired_data(timeout_seconds=300):
-    print('[Cleanup] Bắt đầu dọn dữ liệu quá hạn...')
-    # Xóa bản ghi Upload cũ
-    now = timezone.now()
-
-    # Xóa file dlhub_ cũ
-    media_path = os.path.join(settings.BASE_DIR, 'media', 'videos')
-    if not os.path.exists(media_path):
-        return
-    now_ts = time.time()
-    for filename in os.listdir(media_path):
-        if filename.startswith('dlhub_'):
-            full_path = os.path.join(media_path, filename)
-            try:
-                if os.path.isfile(full_path):
-                    created = os.path.getctime(full_path)
-                    if now_ts - created > timeout_seconds:
-                        os.remove(full_path)
-                        print(f"Deleted: {full_path}")
-            except Exception as e:
-                print(f"Error deleting {full_path}: {e}")
-
-def start_updater_once():
-    global _updater_started
-    if _updater_started:
-        return
-
-    _updater_started = True
-
-    import time
-
-    def loop():
-        while True:
-            try:
-                from django.db import connection
-
-                connection.close_if_unusable_or_obsolete()
-                clean_expired_data()
-            except Exception as e:
-                print(f"[Updater Error] {e}")
-            time.sleep(DELAY_UPDATE)
-
-    threading.Thread(target=loop, daemon=True).start()
-
 def is_valid_email(email: str):
     try:
         validate_email(email)

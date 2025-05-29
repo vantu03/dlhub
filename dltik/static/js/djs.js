@@ -200,14 +200,14 @@ function downloadVideo(encoded) {
                     btn.className = "btn btn-primary w-100 d-flex gap-2 mb-2";
                     btn.innerHTML = `<i class="bi bi-download"></i>${item.label}`;
                     buttons.appendChild(btn);
-                } else if (item.type === "audio") {
+                } else if (item.type === "music") {
                     const btn = document.createElement("a");
                     btn.href = item.url;
                     btn.download = "";
                     btn.className = "btn btn-primary w-100 d-flex gap-2 mb-2";
                     btn.innerHTML = `<i class="bi bi-download"></i>${item.label}`;
                     buttons.appendChild(btn);
-                } else if (item.type === "photo") {
+                } else if (item.type === "image") {
                     const col = document.createElement("div");
                     col.className = "col";
 

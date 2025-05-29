@@ -1,7 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.utils import timezone
-from ckeditor.fields import RichTextField
+from django_ckeditor_5.fields import CKEditor5Field
 from django.urls import reverse
 
 class Upload(models.Model):
@@ -18,7 +18,8 @@ class Upload(models.Model):
 class File(models.Model):
     class Type(models.TextChoices):
         VIDEO = 'video', 'Video'
-        PHOTO = 'photo', 'Photo'
+        IMAGE = 'image', 'Image'
+        MUSIC = 'music', 'Music'
 
     upload = models.ForeignKey(Upload, related_name='files', on_delete=models.CASCADE)
     url = models.URLField(max_length=2000)
@@ -46,7 +47,7 @@ class Article(models.Model):
     title = models.CharField(max_length=200)
     slug = models.SlugField(unique=True, blank=True)
     summary = models.CharField(max_length=255, blank=True)
-    content = RichTextField()
+    content = CKEditor5Field()
     views = models.PositiveIntegerField(default=0)
     cover_image = models.URLField(blank=True, null=True)
     show_toc = models.BooleanField(default=True)

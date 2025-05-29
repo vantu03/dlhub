@@ -24,6 +24,9 @@ class ArticleAdmin(admin.ModelAdmin):
     list_filter = ("is_published", "published_at")
     prepopulated_fields = {"slug": ("title",)}
 
+    class Media:
+        js = ('js/ckeditor-5.js',)
+
 @admin.register(PinnedArticle)
 class PinnedArticleAdmin(admin.ModelAdmin):
     list_display = ("article", "order", "pinned_at", "note")

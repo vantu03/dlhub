@@ -2,7 +2,7 @@ function setTheme(mode) {
     localStorage.setItem("theme", mode);
     document.body.className = "";
 
-    // Cập nhật giao diện nút
+    // Cập nhật nút giao diện
     document.querySelectorAll('.theme-btn').forEach(btn => {
         btn.classList.remove('btn-primary');
         btn.classList.add('btn-outline-secondary');
@@ -12,15 +12,37 @@ function setTheme(mode) {
         }
     });
 
-    document.body.classList.add("theme-" + mode);
+    let actualMode = mode;
+    if (mode === "auto") {
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        actualMode = prefersDark ? "dark" : "light";
+    }
+
+    document.body.classList.add("theme-" + actualMode);
+    document.documentElement.setAttribute("data-theme", actualMode);
+
+    // Ghi vào cookie để Django có thể đọc
+    document.cookie = `theme=${actualMode}; path=/; max-age=31536000`;
 }
 
-setTheme(localStorage.getItem("theme") || "auto");
+function initTheme() {
+    const currentTheme = localStorage.getItem("theme") || "auto";
+    setTheme(currentTheme);
 
-// Gán sự kiện click cho các nút
-document.querySelectorAll('.theme-btn').forEach(btn => {
-    btn.addEventListener('click', function () {
-        const mode = this.dataset.theme;
-        setTheme(mode);
+    // Nếu là auto thì lắng nghe thay đổi hệ thống
+    if (currentTheme === "auto") {
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener("change", () => {
+            setTheme("auto");
+        });
+    }
+
+    // Gán sự kiện click cho các nút
+    document.querySelectorAll('.theme-btn').forEach(btn => {
+        btn.addEventListener('click', function () {
+            const mode = this.dataset.theme;
+            setTheme(mode);
+        });
     });
-});
+}
+
+initTheme();

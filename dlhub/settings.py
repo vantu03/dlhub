@@ -18,8 +18,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'dltik',
-    'ckeditor',
-    'ckeditor_uploader',
+    'django_ckeditor_5',
     'django.contrib.sitemaps',
 ]
 
@@ -109,35 +108,67 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 CSRF_TRUSTED_ORIGINS = ['https://dlhub.vn']
 
 CKEDITOR_UPLOAD_PATH = "uploads/"
-CKEDITOR_CONFIGS = {
-    'default': {
-        'toolbar': [
-            {'name': 'document', 'items': ['Source']},
-            {'name': 'basicstyles', 'items': ['Bold', 'Italic', 'Underline']},
-            {'name': 'paragraph', 'items': ['NumberedList', 'BulletedList', 'Blockquote']},
-            {'name': 'links', 'items': ['Link', 'Unlink']},
-            {'name': 'insert', 'items': ['Image', 'Table']},
-            {'name': 'styles', 'items': ['Format', 'FontSize']},
-            {'name': 'tools', 'items': ['RemoveFormat', 'Maximize']},
+
+CKEDITOR_5_CONFIGS = {
+    "default": {
+        "toolbar": [
+            "heading",
+            "|",
+            "bold",
+            "italic",
+            "underline",
+            "strikethrough",
+            "subscript",
+            "superscript",
+            "|",
+            "alignment",
+            "|",
+            "bulletedList",
+            "numberedList",
+            "todoList",
+            "|",
+            "outdent",
+            "indent",
+            "|",
+            "link",
+            "blockQuote",
+            "insertTable",
+            "imageUpload",
+            "mediaEmbed",
+            "|",
+            "code",
+            "codeBlock",
+            "|",
+            "undo",
+            "redo",
+            "removeFormat",
+            "horizontalLine",
+            "sourceEditing",
         ],
-        'height': 500,
-        'width': 'auto',
-        'toolbarCanCollapse': False,
-        'removePlugins': 'elementspath',
-        'resize_enabled': True,
-        'filebrowserUploadUrl': "/ckeditor/upload/",
-        'filebrowserBrowseUrl': "/ckeditor/browse/",
-        'contentsCss': [
-            'https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css',
-            'https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css',
-        ],
-        'allowedContent': True,
+        "language": "vi",
+        "image": {
+            "toolbar": [
+                "imageTextAlternative",
+                "imageStyle:alignLeft",
+                "imageStyle:full",
+                "imageStyle:alignRight"
+            ]
+        },
+        "table": {
+            "contentToolbar": [
+                "tableColumn",
+                "tableRow",
+                "mergeTableCells"
+            ]
+        }
     }
 }
+
 
 RECAPTCHA_SITE_KEY = "6Le56kgrAAAAABz-8PWQpwY7vd3nRIwIhfd_kZmN"
 RECAPTCHA_SECRET_KEY = "6Le56kgrAAAAADdB5HrWZzn1DqSztvaZhea_F0-j"
 THEMES = [
+    {"thame": "auto", "text": "Auto", "icon": "bi-circle-half"},
     {"thame": "light", "text": "Sáng", "icon": "bi-sun"},
     {"thame": "dark", "text": "Tối", "icon": "bi-moon"},
 ]
