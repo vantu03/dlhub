@@ -168,6 +168,7 @@ function downloadVideo(encoded) {
     const alert = document.getElementById("alert-container");
     const buttons = document.getElementById("download-buttons");
     const photoPreview = document.getElementById("photo-preview");
+    const inputContainer = document.getElementById('input-container');
 
     thumbnail.src = "";
     title.innerText = "";
@@ -184,8 +185,7 @@ function downloadVideo(encoded) {
         })
         .then(res => {
             if (!res.success) throw new Error("Tải video thất bại.");
-
-            document.getElementById('input-container').remove();
+            inputContainer.classList.add("d-none");
             const data = res.data;
 
             thumbnail.src = data.thumbnail;
