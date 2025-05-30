@@ -30,7 +30,7 @@
       "datePublished": "{{ article.published_at|date:'c' }}",
       "mainEntityOfPage": {
         "@type": "WebPage",
-        "@id": "{{ request.scheme }}://{{ request.get_host }}{{ request.path }}"
+        "@id": "{{ BASE_URL }}{{ request.path }}"
       }
     }
   </script>

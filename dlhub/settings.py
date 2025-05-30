@@ -51,7 +51,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
-                'dltik.context.themes_context',
+                'dltik.context.global_settings',
             ],
         },
     },
@@ -170,3 +170,9 @@ CKEDITOR_5_CONFIGS = {
 
 RECAPTCHA_SITE_KEY = os.getenv("RECAPTCHA_SITE_KEY")
 RECAPTCHA_SECRET_KEY = os.getenv("RECAPTCHA_SECRET_KEY")
+
+THEMES = [
+    {"thame": "auto", "text": "Auto", "icon": "bi-circle-half"},
+    {"thame": "light", "text": "Sáng", "icon": "bi-sun"},
+    {"thame": "dark", "text": "Tối", "icon": "bi-moon"},
+]

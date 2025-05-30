@@ -455,5 +455,4 @@ def register(request):
     return render(request, "dltik/register.html", {
         "messages": messages,
         "labels": labels,
-        "recaptcha_site_key": settings.RECAPTCHA_SITE_KEY,
     })
