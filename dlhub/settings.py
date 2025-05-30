@@ -1,12 +1,18 @@
 from pathlib import Path
+import os
+from dotenv import load_dotenv
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = 'django-insecure-*e+drp1##-#*#*@-2!^y!+%v4o3t13=oab46l385t899ahpx1l'
+load_dotenv(BASE_DIR / ".env")
 
-DEBUG = False
+SECRET_KEY = os.getenv("SECRET_KEY")
 
-ALLOWED_HOSTS = ['dlhub.vn', '.dlhub.vn', '127.0.0.1', 'localhost', '14.225.192.23']
+DEBUG = os.getenv("DEBUG", "False") == "True"
+
+BASE_URL = os.getenv("BASE_URL", "http://localhost:8000")
+
+ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "localhost").split(",")
 
 # Application definition
 
@@ -45,7 +51,6 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
-                'dltik.context.current_url',
                 'dltik.context.themes_context',
             ],
         },
@@ -54,22 +59,21 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'dlhub.wsgi.application'
 
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'svprovn_dlhub',
-        'USER': 'svprovn_vantu',
-        'PASSWORD': 'DvAHy7j6Sfk@GWw',
-        'HOST': '103.200.23.188',
-        'PORT': '3306',
+        'NAME': os.getenv("DB_NAME"),
+        'USER': os.getenv("DB_USER"),
+        'PASSWORD': os.getenv("DB_PASSWORD"),
+        'HOST': os.getenv("DB_HOST", "localhost"),
+        'PORT': os.getenv("DB_PORT", "3306"),
         'OPTIONS': {
             'charset': 'utf8mb4',
             'init_command': "SET NAMES 'utf8mb4' COLLATE 'utf8mb4_unicode_ci'"
         },
     }
 }
-
-
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -105,7 +109,7 @@ MEDIA_ROOT = BASE_DIR / 'media'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-CSRF_TRUSTED_ORIGINS = ['https://dlhub.vn']
+CSRF_TRUSTED_ORIGINS = os.getenv("CSRF_TRUSTED_ORIGINS", "").split(",")
 
 CKEDITOR_UPLOAD_PATH = "uploads/"
 
@@ -164,12 +168,5 @@ CKEDITOR_5_CONFIGS = {
     }
 }
 
-
-RECAPTCHA_SITE_KEY = "6Le56kgrAAAAABz-8PWQpwY7vd3nRIwIhfd_kZmN"
-RECAPTCHA_SECRET_KEY = "6Le56kgrAAAAADdB5HrWZzn1DqSztvaZhea_F0-j"
-THEMES = [
-    {"thame": "auto", "text": "Auto", "icon": "bi-circle-half"},
-    {"thame": "light", "text": "Sáng", "icon": "bi-sun"},
-    {"thame": "dark", "text": "Tối", "icon": "bi-moon"},
-]
-
+RECAPTCHA_SITE_KEY = os.getenv("RECAPTCHA_SITE_KEY")
+RECAPTCHA_SECRET_KEY = os.getenv("RECAPTCHA_SECRET_KEY")

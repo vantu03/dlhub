@@ -1,20 +1,18 @@
-from urllib.parse import urlparse, quote
-import base64, json, hashlib, hmac, threading, uuid, yt_dlp, os, time, re
-from django.utils import timezone
+from urllib.parse import quote
+import base64, json, hashlib, hmac, uuid, yt_dlp, os, time, re
 from django.conf import settings
 from django.core.validators import validate_email
 from django.core.exceptions import ValidationError
 
 _updater_started = False
 
-SECRET_KEY = os.environ.get("SECRET_KEY", "dlhub_super_secret_dev_key")
 DELAY_UPDATE = 60
 
 def encode_token(data, ts=None) -> str:
     if ts is None:
         ts = int(time.time()) + 300
     data_str = json.dumps(data, separators=(',', ':'))
-    sig = hmac.new(SECRET_KEY.encode(), data_str.encode(), hashlib.sha256).hexdigest()
+    sig = hmac.new(settings.SECRET_KEY.encode(), data_str.encode(), hashlib.sha256).hexdigest()
     payload = {"data": data, "ts": ts, "sig": sig}
     return base64.urlsafe_b64encode(json.dumps(payload).encode()).decode()
 
@@ -29,7 +27,7 @@ def decode_token(encoded_token):
 
         # Verify chữ ký
         data_str = json.dumps(data, separators=(',', ':'))
-        expected_sig = hmac.new(SECRET_KEY.encode(), data_str.encode(), hashlib.sha256).hexdigest()
+        expected_sig = hmac.new(settings.SECRET_KEY.encode(), data_str.encode(), hashlib.sha256).hexdigest()
         if sig != expected_sig:
             return {'error': 1, 'msg': 'sig'}
 
@@ -69,7 +67,7 @@ def download_format(label, fmt, video_url, upload, save, request):
             ext = info.get('ext', 'mp4')
 
             if save:
-                path = f"{get_base_url(request)}/media/videos/{filename}.{ext}"
+                path = f"{settings.BASE_URL}/media/videos/{filename}.{ext}"
             else:
                 path = info.get('url', '')
 
@@ -94,11 +92,6 @@ def get_formats(url):
     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
         info = ydl.extract_info(url, download=False)
         return info
-
-def get_base_url(request) -> str:
-    scheme = 'https' if request.is_secure() else 'http'
-    host = request.get_host()
-    return f"{scheme}://{host}"
 
 def encode_data(data):
     new_urls = []

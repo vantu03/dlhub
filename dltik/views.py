@@ -2,21 +2,20 @@ from django.http import JsonResponse
 from django.shortcuts import render
 from .models import Article, User, Upload, PinnedArticle, Page, Favorite, File
 from dltik import utils
-import json, requests, threading, re, uuid
+import json, requests, threading, re
 from django.http import StreamingHttpResponse, HttpResponse
 from django.template import Template, Context
 from django.contrib.sitemaps import Sitemap
 from django.urls import reverse
 from urllib.parse import unquote
 from django.core.paginator import Paginator
-from django.db.models import Q, F
+from django.db.models import Q
 from django.shortcuts import redirect
 from django.contrib.auth import authenticate, login as auth_login, logout as auth_logout
 from django.conf import settings
 from urllib.parse import quote
 from django.utils.http import url_has_allowed_host_and_scheme
 from vt_dlhub import DLHub
-from bs4 import BeautifulSoup
 from requests.utils import cookiejar_from_dict
 
 def ads(request):
@@ -300,14 +299,13 @@ class ArticleSitemap(Sitemap):
         return obj.published_at
 
 def robots_txt(request):
-    base_url = utils.get_base_url(request)
     lines = [
         "User-agent: *",
         "Disallow: /admin/",
         "Disallow: /set-theme/",
         "Disallow: /user/logout/",
         "Allow: /",
-        f"Sitemap: {base_url}/sitemap.xml",
+        f"Sitemap: {settings.BASE_URL}/sitemap.xml",
     ]
     return HttpResponse("\n".join(lines), content_type="text/plain")
 
