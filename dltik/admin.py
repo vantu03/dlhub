@@ -1,5 +1,6 @@
 from django.contrib import admin
-from .models import Article, Upload, File, PinnedArticle, Tag, Page, Comment, Favorite
+from .models import Article, Upload, File, PinnedArticle, Tag, Page, Comment, Favorite, Thumbnail
+from django.utils.html import format_html
 
 @admin.register(Upload)
 class UploadAdmin(admin.ModelAdmin):
@@ -23,6 +24,7 @@ class ArticleAdmin(admin.ModelAdmin):
     search_fields = ("title", "summary", "tags")
     list_filter = ("is_published", "published_at")
     prepopulated_fields = {"slug": ("title",)}
+    filter_horizontal = ['thumbnails', 'tags']
 
     class Media:
         js = ('js/ckeditor-5.js',)
@@ -75,3 +77,15 @@ class CommentAdmin(admin.ModelAdmin):
         for comment in queryset:
             comment.reject("Từ chối bởi quản trị viên.")
         self.message_user(request, f"Đã từ chối {queryset.count()} bình luận.")
+
+
+@admin.register(Thumbnail)
+class ThumbnailAdmin(admin.ModelAdmin):
+    list_display = ('alt_text', 'preview', 'created_at')
+    search_fields = ['alt_text']
+
+    def preview(self, obj):
+        if obj.image:
+            return format_html('<img src="{}" width="100" alt="{}" />', obj.image.url, obj.alt_text)
+        return "-"
+    preview.short_description = "Ảnh"

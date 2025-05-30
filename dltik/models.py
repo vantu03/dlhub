@@ -3,6 +3,9 @@ from django.contrib.auth.models import User
 from django.utils import timezone
 from django_ckeditor_5.fields import CKEditor5Field
 from django.urls import reverse
+from bs4 import BeautifulSoup
+from django.templatetags.static import static
+import os
 
 class Upload(models.Model):
 
@@ -42,14 +45,31 @@ class Tag(models.Model):
     def __str__(self):
         return self.name
 
+class Thumbnail(models.Model):
+    image = models.ImageField(upload_to='thumbnails/')
+    alt_text = models.CharField(max_length=255, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.alt_text or self.image.name
+
+    @property
+    def url(self):
+        return self.image.url
+
+    def delete(self, *args, **kwargs):
+        # Xóa file khỏi ổ cứng trước
+        if self.image and os.path.isfile(self.image.path):
+            os.remove(self.image.path)
+        super().delete(*args, **kwargs)
 
 class Article(models.Model):
     title = models.CharField(max_length=200)
     slug = models.SlugField(unique=True, blank=True)
     summary = models.CharField(max_length=255, blank=True)
     content = CKEditor5Field()
+    thumbnails = models.ManyToManyField(Thumbnail, related_name='articles')
     views = models.PositiveIntegerField(default=0)
-    cover_image = models.URLField(blank=True, null=True)
     show_toc = models.BooleanField(default=True)
     show_meta = models.BooleanField(default=True)
     allow_comments = models.BooleanField(default=True)
@@ -75,6 +95,19 @@ class Article(models.Model):
 
     def get_absolute_url(self):
         return reverse('article', kwargs={'slug': self.slug})
+
+    @property
+    def thumbnail(self):
+        first_thumb = self.thumbnails.first()
+        if first_thumb:
+            return first_thumb.url
+
+        soup = BeautifulSoup(self.content or "", "html.parser")
+        first_img = soup.find("img")
+        if first_img and first_img.get("src"):
+            return first_img["src"]
+
+        return static('images/banner.png')
 
 class PinnedArticle(models.Model):
     article = models.OneToOneField(Article, on_delete=models.CASCADE, related_name='pinned')

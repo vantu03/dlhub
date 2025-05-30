@@ -38,8 +38,8 @@
         {% for article in page_obj %}
           <a href="{% url 'article' slug=article.slug %}" class="list-group-item list-group-item-action py-3 border rounded mb-3 shadow-sm">
             <article itemscope itemtype="https://schema.org/Article" class="d-flex align-items-start gap-3">
-              {% if article.cover_image %}
-                <img src="{{ article.cover_image }}" alt="{{ article.title }}"
+              {% if article.thumbnail %}
+                <img src="{{ article.thumbnail }}" alt="{{ article.title }}"
                      class="rounded" style="width: 100px; height: 100px; object-fit: cover;" itemprop="image">
               {% endif %}
               <div>

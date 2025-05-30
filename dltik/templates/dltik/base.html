@@ -10,15 +10,15 @@
     <meta name="description" content="{% block description %}Tải video nhanh chóng từ TikTok hoàn toàn miễn phí. Không logo, không watermark, không cần tài khoản!{% endblock %}" />
     <meta name="keywords" content="{% block keywords %}tải video tiktok không logo, tải video nhanh{% endblock %}" />
     <meta name="author" content="DLHub" />
-    <link rel="canonical" href="{% block canonical_url %}{{ request.path }}{% endblock %}">
+    <link rel="canonical" href="{% block canonical_url %}{{ request.scheme }}://{{ request.get_host }}{{ request.path }}{% endblock %}">
     <meta name="csrf-token" content="{{ csrf_token }}">
 
     <!-- Open Graph -->
     <meta property="og:title" content="{% block og_title %}DLHub - Tải video TikTok không logo{% endblock %}" />
     <meta property="og:description" content="{% block og_description %}Dán link và tải video ngay lập tức. Hỗ trợ TikTok miễn phí, đơn giản, không logo.{% endblock %}" />
     <meta property="og:image" content="{% block og_image %}{% static 'images/banner.png' %}{% endblock %}" />
-    <meta property="og:url" content="{% block og_url %}{{ curr_url }}{% endblock %}" />
-    <meta property="og:type" content="website" />
+    <meta property="og:url" content="{% block og_url %}{{ request.scheme }}://{{ request.get_host }}{{ request.path }}{% endblock %}" />
+    <meta property="og:type" content="{% block og_type %}website{% endblock %}" />
 
     <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image" />
@@ -36,9 +36,7 @@
     <meta name="theme-color" content="#2196f3">
     <link rel="apple-touch-icon" href="{% static 'images/apple-touch-icon.png' %}"> <!-- iOS icon -->
 
-    {% if request.GET %}
-      <meta name="robots" content="noindex, follow">
-    {% endif %}
+    <meta name="robots" content="index, follow">
     <link rel="stylesheet" href="{% static 'css/thames.css' %}?v2">
 
     <!-- Service Worker -->
@@ -69,7 +67,24 @@
     </script>
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1943234013014279"
          crossorigin="anonymous"></script>
-    {% block extra_head %}{% endblock %}
+    {% block extra_head %}
+        <script type="application/ld+json">
+        {
+          "@context": "https://schema.org",
+          "@type": "WebSite",
+          "name": "DLHub",
+          "url": "https://dlhub.vn",
+          "publisher": {
+            "@type": "Organization",
+            "name": "DLHub",
+            "logo": {
+              "@type": "ImageObject",
+              "url": "https://dlhub.vn/static/images/logo.png"
+            }
+          }
+        }
+    </script>
+    {% endblock %}
     <meta name="google-adsense-account" content="ca-pub-1943234013014279">
     <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=AW-11499685493"></script>
@@ -88,8 +103,6 @@
     <script>
       gtag('event', 'conversion', {'send_to': 'AW-11499685493/TUZqCMzA7scaEPWMvesq'});
     </script>
-
-
 <style>
 </style>
 

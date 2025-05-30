@@ -2,20 +2,18 @@
 {% load static %}
 
 {% block title %}{{ article.title }}{% endblock %}
-
 {% block description %}{{ article.summary|default:article.content|truncatewords:25|striptags }}{% endblock %}
-
 {% block keywords %}{% for tag in article.get_tags %}{{ tag.name }}{% if not forloop.last %}, {% endif %}{% endfor %}{% endblock %}
-
 
 {% block og_title %}{{ article.title }}{% endblock %}
 {% block og_description %}{{ article.summary|default:article.content|truncatewords:25|striptags }}{% endblock %}
-{% if article.cover_image %}{% block og_image %}{{ article.cover_image }}{% endblock %}{% endif %}
 
 {% block twitter_title %}{{ article.title }}{% endblock %}
-
 {% block twitter_description %}{{ article.summary|default:article.content|truncatewords:25|striptags }}{% endblock %}
-
+{% if article.thumbnail %}
+    {% block og_image %}{{ article.thumbnail }}{% endblock %}
+    {% block twitter_image %}{{ article.thumbnail }}{% endblock %}
+{% endif %}
 {% block extra_head %}
   {{ block.super }}
   <script type="application/ld+json">
@@ -32,7 +30,7 @@
       "datePublished": "{{ article.published_at|date:'c' }}",
       "mainEntityOfPage": {
         "@type": "WebPage",
-        "@id": "{{ request.path }}"
+        "@id": "{{ request.scheme }}://{{ request.get_host }}{{ request.path }}"
       }
     }
   </script>

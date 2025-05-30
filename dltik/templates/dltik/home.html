@@ -128,8 +128,8 @@
               {% for pinned in pinned_articles %}
                 <a href="{% url 'article' slug=pinned.article.slug %}" class="list-group-item list-group-item-action py-3 border rounded mb-3 shadow-sm">
                   <div class="d-flex align-items-start gap-3">
-                    {% if pinned.article.cover_image %}
-                      <img src="{{ pinned.article.cover_image }}" alt="{{ pinned.article.title }}"
+                    {% if pinned.article.thumbnail %}
+                      <img src="{{ pinned.article.thumbnail }}" alt="{{ pinned.article.title }}"
                            class="rounded" style="width: 100px; height: 100px; object-fit: cover;">
                     {% endif %}
                     <div>
