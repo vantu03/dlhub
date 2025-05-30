@@ -166,7 +166,7 @@
             {% else %}
                 <p class="text-muted fst-italic">
                     <i class="bi bi-box-arrow-in-right me-1"></i>
-                    <a href="{% url 'login' %}?next={{ request.path }}">Đăng nhập</a> để gửi bình luận.
+                    <a href="{% url 'login' %}?next={{ request.GET.next|default:request.get_full_path|urlencode }}">Đăng nhập</a> để gửi bình luận.
                 </p>
             {% endif %}
 
