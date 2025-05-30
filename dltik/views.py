@@ -300,12 +300,18 @@ class ArticleSitemap(Sitemap):
         return obj.published_at
 
 def robots_txt(request):
-    sitemap_url = f"{utils.get_base_url(request)}/sitemap.xml"
+    base_url = utils.get_base_url(request)
     lines = [
         "User-agent: *",
         "Disallow: /admin/",
+        "Disallow: /set-theme/",
+        "Disallow: /*?next=",
+        "Disallow: /*&next=",
+        "Disallow: /user/login/",
+        "Disallow: /user/register/",
+        "Disallow: /user/logout/",
         "Allow: /",
-        f"Sitemap: {sitemap_url}",
+        f"Sitemap: {base_url}/sitemap.xml",
     ]
     return HttpResponse("\n".join(lines), content_type="text/plain")
 
