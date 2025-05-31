@@ -3,5 +3,7 @@
   <component name="VcsDirectoryMappings">
     <mapping directory="" vcs="Git" />
     <mapping directory="$PROJECT_DIR$" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/dltik/static/tinymce" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/dltik/static/tinymce/plugins/codemirror/tinymce-codemirror" vcs="Git" />
   </component>
 </project>

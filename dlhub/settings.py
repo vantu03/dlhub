@@ -114,11 +114,11 @@ CSRF_TRUSTED_ORIGINS = os.getenv("CSRF_TRUSTED_ORIGINS", "").split(",")
 CKEDITOR_UPLOAD_PATH = "uploads/"
 
 TINYMCE_DEFAULT_CONFIG = {
-    'height': 500,
+    'height': '720',
     'width': '100%',
     'menubar': True,
-    'plugins': 'image code codesample',
-    'toolbar': 'undo redo | formatselect | bold italic | alignleft aligncenter alignright | image | codesample | code',
+    'plugins': 'image code codesample lists',
+    'toolbar': 'undo redo | formatselect | bold italic underline | alignleft aligncenter alignright | bullist numlist indent outdent | image | code',
     'images_upload_url': '/tinymce/upload/',
     'automatic_uploads': True,
     'file_picker_types': 'image',
@@ -138,8 +138,6 @@ TINYMCE_DEFAULT_CONFIG = {
         {'text': 'JSON', 'value': 'json'},
     ],
 }
-
-
 
 RECAPTCHA_SITE_KEY = os.getenv("RECAPTCHA_SITE_KEY")
 RECAPTCHA_SECRET_KEY = os.getenv("RECAPTCHA_SECRET_KEY")
