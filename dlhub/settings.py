@@ -127,7 +127,7 @@ TINYMCE_DEFAULT_CONFIG = {
         'https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css',
     ],
     'valid_elements': '*[*]',
-    'extended_valid_elements': 'script[language|type|src|charset],iframe[src|width|height|name|align|allowfullscreen|frameborder]',
+    'extended_valid_elements': 'style[type],script[language|type|src|charset],iframe[src|width|height|name|align|allowfullscreen|frameborder]',
     'verify_html': False,
     'codesample_languages': [
         {'text': 'Python', 'value': 'python'},
