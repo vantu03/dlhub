@@ -1,11 +1,11 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.utils import timezone
-from django_ckeditor_5.fields import CKEditor5Field
 from django.urls import reverse
 from bs4 import BeautifulSoup
 from django.templatetags.static import static
 import os
+from tinymce.models import HTMLField
 
 class Upload(models.Model):
 
@@ -67,7 +67,7 @@ class Article(models.Model):
     title = models.CharField(max_length=200)
     slug = models.SlugField(unique=True, blank=True)
     summary = models.CharField(max_length=255, blank=True)
-    content = CKEditor5Field()
+    content = HTMLField()
     thumbnails = models.ManyToManyField(Thumbnail, related_name='articles')
     views = models.PositiveIntegerField(default=0)
     show_toc = models.BooleanField(default=True)

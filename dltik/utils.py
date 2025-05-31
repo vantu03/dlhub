@@ -1,5 +1,5 @@
 from urllib.parse import quote
-import base64, json, hashlib, hmac, uuid, yt_dlp, os, time, re
+import base64, json, hashlib, hmac, uuid, yt_dlp, time, re
 from django.conf import settings
 from django.core.validators import validate_email
 from django.core.exceptions import ValidationError

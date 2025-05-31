@@ -24,8 +24,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'dltik',
-    'django_ckeditor_5',
     'django.contrib.sitemaps',
+    'tinymce'
 ]
 
 MIDDLEWARE = [
@@ -113,60 +113,33 @@ CSRF_TRUSTED_ORIGINS = os.getenv("CSRF_TRUSTED_ORIGINS", "").split(",")
 
 CKEDITOR_UPLOAD_PATH = "uploads/"
 
-CKEDITOR_5_CONFIGS = {
-    "default": {
-        "toolbar": [
-            "heading",
-            "|",
-            "bold",
-            "italic",
-            "underline",
-            "strikethrough",
-            "subscript",
-            "superscript",
-            "|",
-            "alignment",
-            "|",
-            "bulletedList",
-            "numberedList",
-            "todoList",
-            "|",
-            "outdent",
-            "indent",
-            "|",
-            "link",
-            "blockQuote",
-            "insertTable",
-            "imageUpload",
-            "mediaEmbed",
-            "|",
-            "code",
-            "codeBlock",
-            "|",
-            "undo",
-            "redo",
-            "removeFormat",
-            "horizontalLine",
-            "sourceEditing",
-        ],
-        "language": "vi",
-        "image": {
-            "toolbar": [
-                "imageTextAlternative",
-                "imageStyle:alignLeft",
-                "imageStyle:full",
-                "imageStyle:alignRight"
-            ]
-        },
-        "table": {
-            "contentToolbar": [
-                "tableColumn",
-                "tableRow",
-                "mergeTableCells"
-            ]
-        }
-    }
+TINYMCE_DEFAULT_CONFIG = {
+    'height': 500,
+    'width': '100%',
+    'menubar': True,
+    'plugins': 'image code codesample',
+    'toolbar': 'undo redo | formatselect | bold italic | alignleft aligncenter alignright | image | codesample | code',
+    'images_upload_url': '/tinymce/upload/',
+    'automatic_uploads': True,
+    'file_picker_types': 'image',
+    'content_css': [
+        'https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css',
+        'https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css',
+    ],
+    'valid_elements': '*[*]',
+    'extended_valid_elements': 'script[language|type|src|charset],iframe[src|width|height|name|align|allowfullscreen|frameborder]',
+    'verify_html': False,
+    'codesample_languages': [
+        {'text': 'Python', 'value': 'python'},
+        {'text': 'HTML/XML', 'value': 'markup'},
+        {'text': 'JavaScript', 'value': 'javascript'},
+        {'text': 'CSS', 'value': 'css'},
+        {'text': 'Bash', 'value': 'bash'},
+        {'text': 'JSON', 'value': 'json'},
+    ],
 }
+
+
 
 RECAPTCHA_SITE_KEY = os.getenv("RECAPTCHA_SITE_KEY")
 RECAPTCHA_SECRET_KEY = os.getenv("RECAPTCHA_SECRET_KEY")

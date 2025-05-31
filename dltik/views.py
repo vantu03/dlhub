@@ -17,6 +17,8 @@ from urllib.parse import quote
 from django.utils.http import url_has_allowed_host_and_scheme
 from vt_dlhub import DLHub
 from requests.utils import cookiejar_from_dict
+from django.views.decorators.csrf import csrf_exempt
+from django.core.files.storage import default_storage
 
 def ads(request):
     return render(request, 'dltik/ads.txt')
@@ -456,3 +458,12 @@ def register(request):
         "messages": messages,
         "labels": labels,
     })
+
+@csrf_exempt
+def tinymce_image_upload(request):
+    if request.method == 'POST' and request.FILES.get('file'):
+        file = request.FILES['file']
+        path = default_storage.save(f"uploads/{file.name}", file)
+        url = settings.MEDIA_URL + path
+        return JsonResponse({'location': url})
+    return JsonResponse({'error': 'Không hợp lệ'}, status=400)

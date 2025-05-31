@@ -17,6 +17,6 @@ urlpatterns = [
     path("user/login/", views.login, name="login"),
     path("user/logout/", views.logout, name="logout"),
     path("user/register/", views.register, name="register"),
-
+    path('tinymce/upload/', views.tinymce_image_upload, name='tinymce_image_upload'),
 ]
 
