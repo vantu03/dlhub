@@ -224,3 +224,6 @@ body.theme-dark {
 .theme-dark .table-responsive {
     background-color: var(--bs-table-bg);
 }
+img {
+    max-width: 100%;
+}
