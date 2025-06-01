@@ -1,14 +1,16 @@
 from django.db import models
-from django.contrib.auth.models import User
 from django.utils import timezone
 from django.urls import reverse
 from bs4 import BeautifulSoup
 from django.templatetags.static import static
 import os
 from tinymce.models import HTMLField
+from mimetypes import guess_type
+from django.contrib.auth import get_user_model
+User = get_user_model()
+
 
 class Upload(models.Model):
-
     source_url = models.URLField()
     final_url = models.URLField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -45,30 +47,55 @@ class Tag(models.Model):
     def __str__(self):
         return self.name
 
-class Thumbnail(models.Model):
-    image = models.ImageField(upload_to='thumbnails/')
+class MediaAsset(models.Model):
+    class MediaType(models.TextChoices):
+        IMAGE = 'image', 'Image'
+        VIDEO = 'video', 'Video'
+        AUDIO = 'audio', 'Audio'
+
+    file = models.FileField(upload_to='uploads/')
+    type = models.CharField(max_length=10, choices=MediaType.choices)
     alt_text = models.CharField(max_length=255, blank=True)
+    uploaded_by = models.ForeignKey(User, null=True, blank=True, on_delete=models.SET_NULL, related_name="media_assets")
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return self.alt_text or self.image.name
+        return f"{self.type}: {self.file.name}"
+
+    def save(self, *args, **kwargs):
+        if not self.alt_text:
+            self.alt_text = os.path.basename(self.file.name)
+
+        if not self.type:
+            mime_type, _ = guess_type(self.file.name)
+            if mime_type:
+                if mime_type.startswith("image"):
+                    self.type = self.MediaType.IMAGE
+                elif mime_type.startswith("video"):
+                    self.type = self.MediaType.VIDEO
+                elif mime_type.startswith("audio"):
+                    self.type = self.MediaType.AUDIO
+        super().save(*args, **kwargs)
 
     @property
     def url(self):
-        return self.image.url
+        return self.file.url
 
     def delete(self, *args, **kwargs):
-        # Xóa file khỏi ổ cứng trước
-        if self.image and os.path.isfile(self.image.path):
-            os.remove(self.image.path)
+        if self.file and os.path.isfile(self.file.path):
+            os.remove(self.file.path)
         super().delete(*args, **kwargs)
+
+    class Meta:
+        ordering = ['-created_at']
+
 
 class Article(models.Model):
     title = models.CharField(max_length=200)
     slug = models.SlugField(unique=True, blank=True)
     summary = models.CharField(max_length=255, blank=True)
     content = HTMLField()
-    thumbnails = models.ManyToManyField(Thumbnail, related_name='articles')
+    thumbnails = models.ManyToManyField(MediaAsset, related_name='articles')
     views = models.PositiveIntegerField(default=0)
     show_toc = models.BooleanField(default=True)
     show_meta = models.BooleanField(default=True)

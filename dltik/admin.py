@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Article, Upload, File, PinnedArticle, Tag, Page, Comment, Favorite, Thumbnail
+from .models import Article, Upload, File, PinnedArticle, Tag, Page, Comment, Favorite, MediaAsset
 from django.utils.html import format_html
 
 @admin.register(Upload)
@@ -76,13 +76,14 @@ class CommentAdmin(admin.ModelAdmin):
         self.message_user(request, f"Đã từ chối {queryset.count()} bình luận.")
 
 
-@admin.register(Thumbnail)
-class ThumbnailAdmin(admin.ModelAdmin):
-    list_display = ('alt_text', 'preview', 'created_at')
-    search_fields = ['alt_text']
+class MediaAssetAdmin(admin.ModelAdmin):
+    list_display = ('type', 'alt_text', 'uploaded_by', 'preview', 'created_at')
+    list_filter = ('type', 'created_at')
+    search_fields = ['alt_text', 'file']
+    readonly_fields = ['created_at']
 
     def preview(self, obj):
-        if obj.image:
-            return format_html('<img src="{}" width="100" alt="{}" />', obj.image.url, obj.alt_text)
-        return "-"
-    preview.short_description = "Ảnh"
+        if obj.type == 'image' and obj.file:
+            return format_html('<img src="{}" width="100" alt="{}" />', obj.file.url, obj.alt_text)
+        return "Không hiển thị"
+    preview.short_description = "Xem trước"

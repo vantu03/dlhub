@@ -1,6 +1,6 @@
 from django.http import JsonResponse
 from django.shortcuts import render
-from .models import Article, User, Upload, PinnedArticle, Page, Favorite, File
+from .models import Article, User, Upload, PinnedArticle, Page, Favorite, File, MediaAsset
 from dltik import utils
 import json, requests, threading, re
 from django.http import StreamingHttpResponse, HttpResponse
@@ -18,7 +18,6 @@ from django.utils.http import url_has_allowed_host_and_scheme
 from vt_dlhub import DLHub
 from requests.utils import cookiejar_from_dict
 from django.views.decorators.csrf import csrf_exempt
-from django.core.files.storage import default_storage
 
 def ads(request):
     return render(request, 'dltik/ads.txt')
@@ -463,7 +462,14 @@ def register(request):
 def tinymce_image_upload(request):
     if request.method == 'POST' and request.FILES.get('file'):
         file = request.FILES['file']
-        path = default_storage.save(f"uploads/{file.name}", file)
-        url = settings.MEDIA_URL + path
-        return JsonResponse({'location': url})
+
+        asset = MediaAsset.objects.create(
+            file=file,
+            type='image',
+            alt_text=file.name,
+            uploaded_by=request.user if request.user.is_authenticated else None
+        )
+
+        return JsonResponse({'location': asset.url})
+
     return JsonResponse({'error': 'Không hợp lệ'}, status=400)
