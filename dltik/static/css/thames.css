@@ -163,3 +163,64 @@ body.theme-dark {
   border-color: #66afe9;
   box-shadow: 0 0 0 0.2rem rgba(102, 175, 233, 0.25);
 }
+/* Table trong dark mode */
+/* Ghi đè biến Bootstrap để hỗ trợ dark mode */
+.theme-dark {
+    --bs-body-bg: #121212;
+    --bs-body-color: #e0e0e0;
+    --bs-border-color: #333;
+    --bs-emphasis-color: #e0e0e0;
+
+    --bs-table-bg: #1f1f1f;
+    --bs-table-striped-bg: #262626;
+    --bs-table-hover-bg: #333333;
+    --bs-table-border-color: #444;
+}
+
+/* Table cơ bản */
+.theme-dark table,
+.theme-dark .table {
+    background-color: var(--bs-table-bg) !important;
+    color: var(--bs-emphasis-color) !important;
+    border-color: var(--bs-table-border-color) !important;
+}
+
+/* Header */
+.theme-dark .table thead {
+    background-color: #2a2a2a !important;
+    color: #ffffff !important;
+}
+
+/* Ô trong bảng */
+.theme-dark .table th,
+.theme-dark .table td {
+    border-color: var(--bs-table-border-color) !important;
+    background-color: var(--bs-table-bg);
+    color: var(--bs-emphasis-color);
+}
+
+/* Table có border */
+.theme-dark .table-bordered th,
+.theme-dark .table-bordered td {
+    border: 1px solid var(--bs-table-border-color) !important;
+}
+
+/* Table có zebra (striped) */
+.theme-dark .table-striped tbody tr:nth-of-type(odd) {
+    background-color: var(--bs-table-bg) !important;
+}
+
+.theme-dark .table-striped tbody tr:nth-of-type(even) {
+    background-color: var(--bs-table-striped-bg) !important;
+}
+
+/* Hover */
+.theme-dark .table-hover tbody tr:hover {
+    background-color: var(--bs-table-hover-bg) !important;
+    color: var(--bs-emphasis-color) !important;
+}
+
+/* Responsive wrapper (nếu dùng .table-responsive) */
+.theme-dark .table-responsive {
+    background-color: var(--bs-table-bg);
+}
