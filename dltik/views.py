@@ -305,6 +305,7 @@ def robots_txt(request):
         "Disallow: /admin/",
         "Disallow: /set-theme/",
         "Disallow: /user/logout/",
+        "Disallow: / * ?next =",
         "Allow: /",
         f"Sitemap: {settings.BASE_URL}/sitemap.xml",
     ]
