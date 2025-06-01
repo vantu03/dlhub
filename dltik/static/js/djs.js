@@ -240,7 +240,7 @@ function downloadVideo(encoded) {
                 }
             });
 
-            const hasPhoto = data.urls.some(item => item.type === "photo");
+            const hasPhoto = data.urls.some(item => item.type === "image");
 
             if (hasPhoto) {
                 setTimeout(() => {
