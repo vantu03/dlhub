@@ -76,6 +76,7 @@ class CommentAdmin(admin.ModelAdmin):
         self.message_user(request, f"Đã từ chối {queryset.count()} bình luận.")
 
 
+@admin.register(MediaAsset)
 class MediaAssetAdmin(admin.ModelAdmin):
     list_display = ('type', 'alt_text', 'uploaded_by', 'preview', 'created_at')
     list_filter = ('type', 'created_at')
