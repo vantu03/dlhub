@@ -4,11 +4,12 @@ from django.utils.html import format_html
 
 @admin.register(Upload)
 class UploadAdmin(admin.ModelAdmin):
-    list_display = ("title", "source_url", "file_count", "created_at")
+    list_display = ("title", "file_count", "source_url", "created_at")
     search_fields = ("title", "source_url")
 
     def file_count(self, obj):
         return obj.files.count()
+
     file_count.short_description = "Số file"
 
 @admin.register(File)
@@ -87,4 +88,5 @@ class MediaAssetAdmin(admin.ModelAdmin):
         if obj.type == 'image' and obj.file:
             return format_html('<img src="{}" width="100" alt="{}" />', obj.file.url, obj.alt_text)
         return "Không hiển thị"
+
     preview.short_description = "Xem trước"

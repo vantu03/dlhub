@@ -22,6 +22,6 @@ sqlparse==0.5.3
 typing_extensions==4.13.2
 tzdata==2025.2
 urllib3==2.4.0
-vt_dlhub @ git+https://github.com/vantu03/vt_dlhub.git@7e9779608c8d10b42cc514f2947886902062de3d
+vt_dlhub @ git+https://github.com/vantu03/vt_dlhub.git@f144ba74a5492a330a1880d103c6ed16d08f6a84
 wheel==0.45.1
 yt-dlp==2025.4.30

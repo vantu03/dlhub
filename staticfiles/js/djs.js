@@ -194,24 +194,20 @@ function downloadVideo(encoded) {
 
             data.urls.forEach(item => {
                 if (item.type === "video") {
-                    if (true) {
-                        const btn = document.createElement("button");
-                        btn.onclick = () => showLink(item.url);
-                        btn.download = "";
-                        btn.className = "btn btn-primary w-100 d-flex gap-2 mb-2";
-                        btn.innerHTML = `<i class="bi bi-download"></i>${item.label}`;
-                        buttons.appendChild(btn);
-                    } else {
-                        const btn = document.createElement("a");
-                        btn.href = item.url;
-                        btn.download = "";
-                        btn.className = "btn btn-primary w-100 d-flex gap-2 mb-2";
-                        btn.innerHTML = `<i class="bi bi-download"></i>${item.label}`;
-                        buttons.appendChild(btn);
-                    }
-                } else if (item.type === "music") {
                     const btn = document.createElement("a");
-                    btn.href = item.url;
+                    const url = new URL(item.url, window.location.origin);
+                    url.searchParams.set("dl", "True");
+                    btn.href = url.toString();
+                    btn.download = "";
+                    btn.className = "btn btn-primary w-100 d-flex gap-2 mb-2";
+                    btn.innerHTML = `<i class="bi bi-download"></i>${item.label}`;
+                    buttons.appendChild(btn);
+                } else if (item.type === "music") {
+
+                    const btn = document.createElement("a");
+                    const url = new URL(item.url, window.location.origin);
+                    url.searchParams.set("dl", "True");
+                    btn.href = url.toString();
                     btn.download = "";
                     btn.className = "btn btn-primary w-100 d-flex gap-2 mb-2";
                     btn.innerHTML = `<i class="bi bi-download"></i>${item.label}`;
@@ -236,7 +232,9 @@ function downloadVideo(encoded) {
                     cardBody.className = "card-body text-center";
 
                     const btn = document.createElement("a");
-                    btn.href = item.url;
+                    const url = new URL(item.url, window.location.origin);
+                    url.searchParams.set("dl", "True");
+                    btn.href = url.toString();
                     btn.download = "";
                     btn.className = "btn btn-outline-primary w-100";
                     btn.innerHTML = `<i class="bi bi-download"></i> ${item.label}`;
@@ -246,6 +244,12 @@ function downloadVideo(encoded) {
                     card.appendChild(cardBody);
                     col.appendChild(card);
                     photoPreview.appendChild(col);
+                } else {
+                    const btn = document.createElement("a");
+                    btn.href = item.url;
+                    btn.className = "btn btn-primary w-100 d-flex gap-2 mb-2";
+                    btn.innerHTML = `${item.label}`;
+                    buttons.appendChild(btn);
                 }
             });
 
@@ -259,7 +263,11 @@ function downloadVideo(encoded) {
 
             completeFakeProgress();
             hideBlur();
-            showMessage("success", "Video sẵn sàng để tải về.");
+            if (data && data.urls && data.urls.length > 0) {
+                showMessage("success", "Video sẵn sàng để tải về.");
+            } else {
+                showMessage("danger", "Không tìm thấy video bạn có thể thử tại lại.");
+            }
             preview.classList.remove("d-none");
         })
         .catch(err => {
@@ -300,55 +308,4 @@ function completeFakeProgress() {
     const wrapper = document.getElementById("progress-wrapper");
 
     wrapper.classList.add("d-none");
-}
-
-function showLink(link) {
-    const popoverId = 'dlhub-group-popover';
-    const overlayId = 'dlhub-overlay';
-    const storageKey = 'dlhub_group_popover_last';
-
-    // Tạo lớp overlay làm mờ nền
-    const overlay = document.createElement('div');
-    overlay.id = overlayId;
-    overlay.className = 'position-fixed top-0 start-0 w-100 h-100';
-    overlay.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
-    overlay.style.zIndex = 1040;
-
-    // Khi bấm overlay cũng đóng
-    overlay.onclick = () => {
-        document.getElementById(popoverId)?.remove();
-        overlay.remove();
-    };
-
-    // Tạo box popover
-    const box = document.createElement('div');
-    box.id = popoverId;
-    box.className = 'position-fixed top-50 start-50 translate-middle bg-white p-4 rounded shadow-lg text-center';
-    box.style.zIndex = 1051;
-    box.style.width = '90%';
-    box.style.maxWidth = '400px';
-
-    box.innerHTML = `
-        <h5 class="mb-3 text-primary"><i class="bi bi-stars me-2"></i>Hoàn tất tải video?</h5>
-        <p class="small text-muted mb-3">Cảm ơn bạn đã sử dụng DLHub! Hãy tham gia nhóm để chia sẻ mẹo, hỏi đáp và cập nhật tính năng mới.</p>
-        <div class="d-grid gap-2 mb-3">
-            <a href="https://www.facebook.com/groups/1255118046232813" target="_blank" class="btn btn-primary">
-                <i class="bi bi-facebook me-1"></i>Tham gia nhóm DLHub
-            </a>
-            <a href="${link}" class="btn btn-success" download>
-                <i class="bi bi-download me-1"></i>Tải video ngay
-            </a>
-        </div>
-        <button class="btn-close position-absolute top-0 end-0 m-2" onclick="
-            document.getElementById('${popoverId}').remove();
-            document.getElementById('${overlayId}').remove();
-        "></button>
-    `;
-
-    // Thêm vào DOM
-    document.body.appendChild(overlay);
-    document.body.appendChild(box);
-
-    // Lưu thời điểm hiển thị
-    localStorage.setItem(storageKey, Date.now().toString());
 }

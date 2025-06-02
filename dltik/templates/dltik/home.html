@@ -52,7 +52,7 @@
     <!-- Kết quả -->
     <div id="alert-container" class="mt-5"></div>
 
-    <div class="container d-none" id="preview-container">
+    <div class="d-none" id="preview-container">
         <div class="d-flex flex-wrap align-items-start justify-content-between bg-light rounded p-3 shadow-sm mb-4 gap-3 text-start">
             <!-- Bên trái: thumbnail + title -->
             <div class="d-flex align-items-start gap-3 flex-grow-1 min-w-0">
@@ -73,11 +73,11 @@
 
 
             <!-- Bên phải: nút tải -->
-            <div class="d-flex flex-column gap-2 flex-shrink-0">
+            <div class="d-flex flex-column flex-shrink-0">
                 <div id="download-buttons">
                     <!-- JS gắn nút tại đây -->
                 </div>
-                <a href="" class="btn btn-success d-flex align-items-start justify-content-start gap-2">
+                <a href="" class="btn btn-success d-flex align-items-start justify-content-start">
                     <i class="bi bi-plus-circle"></i>
                     Tải video khác
                 </a>
@@ -160,6 +160,6 @@
 </div>
 {% endblock %}
 {% block extra_scripts %}
-<script src="{% static 'js/djs.js' %}?v11"></script>
+<script src="{% static 'js/djs.js' %}?v12"></script>
 <script src="https://cdn.jsdelivr.net/npm/linkifyjs@3.0.3/dist/linkify.min.js"></script>
 {% endblock %}
