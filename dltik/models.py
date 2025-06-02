@@ -20,6 +20,10 @@ class Upload(models.Model):
     def __str__(self):
         return f"Upload: {self.title}"
 
+    @property
+    def downloads(self):
+        return self.files.aggregate(models.Sum('downloads'))['downloads__sum'] or 0
+
 class File(models.Model):
     class Type(models.TextChoices):
         VIDEO = 'video', 'Video'
@@ -33,7 +37,7 @@ class File(models.Model):
     filename = models.CharField(max_length=255, blank=True)
     cookies = models.JSONField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
-    download_count = models.IntegerField(default=0)
+    downloads = models.IntegerField(default=0)
 
     def __str__(self):
         return f"{self.filename}"

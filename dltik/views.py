@@ -136,7 +136,7 @@ def perform(request):
 
                     if file:
                         if request.GET.get("dl"):
-                            file.download_count = file.download_count + 1
+                            file.downloads = file.downloads + 1
                             file.save()
                         try:
                             r = requests.get(real_url, headers={

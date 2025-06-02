@@ -4,17 +4,17 @@ from django.utils.html import format_html
 
 @admin.register(Upload)
 class UploadAdmin(admin.ModelAdmin):
-    list_display = ("title", "file_count", "source_url", "created_at")
+    list_display = ("title", "files", "downloads", "source_url", "created_at")
     search_fields = ("title", "source_url")
 
-    def file_count(self, obj):
+    def files(self, obj):
         return obj.files.count()
+    files.short_description = "Số file"
 
-    file_count.short_description = "Số file"
 
 @admin.register(File)
 class FileAdmin(admin.ModelAdmin):
-    list_display = ("label", "filename", "upload", "type", "download_count", "created_at")
+    list_display = ("label", "filename", "upload", "type", "downloads", "created_at")
     search_fields = ("label", "url")
     list_filter = ("created_at", "upload")
 
