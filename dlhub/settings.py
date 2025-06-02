@@ -141,6 +141,18 @@ TINYMCE_DEFAULT_CONFIG = {
 
 RECAPTCHA_SITE_KEY = os.getenv("RECAPTCHA_SITE_KEY")
 RECAPTCHA_SECRET_KEY = os.getenv("RECAPTCHA_SECRET_KEY")
+# Meta SEO
+SITE_NAME = os.getenv("SITE_NAME")
+META_TITLE = os.getenv("META_TITLE")
+META_DESC = os.getenv("META_DESC")
+META_KEYWORDS = os.getenv("META_KEYWORDS")
+
+# Google Analytics & Ads
+GA_ID = os.getenv("GA_ID", "")
+GOOGLE_ADSENSE_CLIENT = os.getenv("GOOGLE_ADSENSE_CLIENT", "")
+GOOGLE_ADS_ID = os.getenv("GOOGLE_ADS_ID", "")
+GOOGLE_ADS_CONVERSION_1 = os.getenv("GOOGLE_ADS_CONVERSION_1", "")
+GOOGLE_ADS_CONVERSION_2 = os.getenv("GOOGLE_ADS_CONVERSION_2", "")
 
 THEMES = [
     {"thame": "auto", "text": "Auto", "icon": "bi-circle-half"},
