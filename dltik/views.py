@@ -135,10 +135,9 @@ def perform(request):
                     file = File.objects.filter(url=real_url).first()
 
                     if file:
-                        file.download_count = file.download_count + 1
-                        file.save()
-                        print(file.cookies)
-                        print(file.url)
+                        if request.GET.get("dl"):
+                            file.download_count = file.download_count + 1
+                            file.save()
                         try:
                             r = requests.get(real_url, headers={
                                 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
