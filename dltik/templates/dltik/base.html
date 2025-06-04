@@ -246,10 +246,6 @@
     <!-- Main Content -->
     <main class="container p-0">
         {% block content %}{% endblock %}
-    </main>
-
-    <!-- Footer -->
-    <footer class="bg-light text-center py-4 mt-5">
 
         <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1943234013014279"
              crossorigin="anonymous"></script>
@@ -263,7 +259,10 @@
         <script>
              (adsbygoogle = window.adsbygoogle || []).push({});
         </script>
+    </main>
 
+    <!-- Footer -->
+    <footer class="bg-light text-center py-4 mt-5">
         <div class="container">
             <p class="mb-1">
                 &copy; {% now "Y" %} {{ SITE_NAME }} Version 2.2
