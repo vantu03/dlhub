@@ -15,7 +15,7 @@ function setTheme(mode) {
     let actualMode = mode;
     if (mode === "auto") {
         //const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-        actualMode = light;//prefersDark ? "dark" : "light";
+        //actualMode = light;//prefersDark ? "dark" : "light";
     }
 
     document.body.classList.add("theme-" + actualMode);
