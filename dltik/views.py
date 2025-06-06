@@ -125,6 +125,17 @@ def perform(request):
                             ]
                         }
                         utils.encode_data(data)
+
+                        def is_ios(request):
+                            user_agent = request.META.get('HTTP_USER_AGENT', '')
+                            return 'iPhone' in user_agent or 'iPad' in user_agent
+
+                        if is_ios(request):
+                            data['urls'].append({
+                                'label': '<img src="https://help.apple.com/assets/6712D663A5C9C17B38070C34/6712D668A5C9C17B38070C3A/en_US/d230a25cb974f8908871af04caad89a1.png" alt="iOS Shortcut" style="width: 24px; height: 24px;">Thêm phím tắt',
+                                'type': 'url',
+                                'url': 'https://www.icloud.com/shortcuts/fa4a84c9d17d495f99ba9e8675b8a0f7'
+                            })
                         return JsonResponse({'success': True, 'data': data})
 
 
