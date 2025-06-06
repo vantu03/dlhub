@@ -309,3 +309,14 @@ function completeFakeProgress() {
 
     wrapper.classList.add("d-none");
 }
+
+document.addEventListener("DOMContentLoaded", function () {
+    const params = new URLSearchParams(window.location.search);
+    const urlParam = params.get("url");
+    if (urlParam) {
+        const input = document.getElementById("video-url-input");
+        input.value = urlParam.trim();
+        input.dispatchEvent(new Event("input"));
+        document.getElementById("download-btn").click();
+    }
+});
