@@ -53,12 +53,10 @@ def perform(request):
 
                         formats = []
                         threads = []
-                        print('dang tai vui long cho')
 
                         if type1 == 0:
                             dl = DLHub(video_url)
                             info = dl.run(download=False)
-                            print(info)
                             info["thumbnail"] = info.get('cover', '')
 
                         else:
