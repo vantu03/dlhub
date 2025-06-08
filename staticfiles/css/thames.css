@@ -227,3 +227,15 @@ body.theme-dark {
 img {
     max-width: 100%;
 }
+.theme-dark .btn-dark {
+    background-color: #343a40;
+    color: #ffffff !important;
+    border-color: #444;
+}
+
+.theme-dark .btn-dark:hover,
+.theme-dark .btn-dark:focus {
+    background-color: #495057;
+    color: #ffffff;
+    border-color: #555;
+}

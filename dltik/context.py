@@ -20,4 +20,7 @@ def global_settings(request):
         'GOOGLE_ADS_ID': settings.GOOGLE_ADS_ID,
         'GOOGLE_ADS_CONVERSION_1': settings.GOOGLE_ADS_CONVERSION_1,
         'GOOGLE_ADS_CONVERSION_2': settings.GOOGLE_ADS_CONVERSION_2,
+
+        # Web Version
+        'WEB_VERSION': settings.WEB_VERSION
     }

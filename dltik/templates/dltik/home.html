@@ -77,10 +77,6 @@
                 <div id="download-buttons">
                     <!-- JS gắn nút tại đây -->
                 </div>
-                <a href="" class="btn btn-success d-flex align-items-start justify-content-start">
-                    <i class="bi bi-plus-circle"></i> 
-                    Tải video khác
-                </a>
             </div>
         </div>
 
@@ -160,6 +156,6 @@
 </div>
 {% endblock %}
 {% block extra_scripts %}
-<script src="{% static 'js/djs.js' %}?v19"></script>
+<script src="{% static 'js/djs.js' %}?v={{ WEB_VERSION }}"></script>
 <script src="https://cdn.jsdelivr.net/npm/linkifyjs@3.0.3/dist/linkify.min.js"></script>
 {% endblock %}

@@ -247,7 +247,14 @@ function downloadVideo(encoded) {
                 } else {
                     const btn = document.createElement("a");
                     btn.href = item.url;
-                    btn.className = "btn btn-primary w-100 d-flex gap-2 mb-2";
+                    if (item.className) {
+                        btn.className = item.className;
+                    } else {
+                        btn.className = "btn btn-primary w-100 d-flex gap-2 mb-2";
+                    }
+                    if (item.target) {
+                        btn.target = item.target;
+                    }
                     btn.innerHTML = `${item.label}`;
                     buttons.appendChild(btn);
                 }

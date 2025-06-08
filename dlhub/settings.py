@@ -12,6 +12,8 @@ DEBUG = os.getenv("DEBUG", "False") == "True"
 
 BASE_URL = os.getenv("BASE_URL", "http://localhost:8000")
 
+WEB_VERSION = os.getenv("WEB_VERSION", "1.0.0")
+
 ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "localhost").split(",")
 
 # Application definition

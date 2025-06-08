@@ -31,7 +31,6 @@
     <!-- Favicon -->
     <link rel="icon" type="image/png" sizes="32x32" href="{% static 'images/favicon-32x32.png' %}">
     <link rel="icon" type="image/png" sizes="16x16" href="{% static 'images/favicon-16x16.png' %}">
-    <link rel="preload" href="{% static 'images/favicon-32x32.png' %}" as="image" type="image/png">
     <link rel="shortcut icon" href="{% static 'images/favicon.ico' %}">
 
     <!-- Web App Manifest -->
@@ -45,8 +44,7 @@
         <meta name="robots" content="index, follow">
     {% endif %}
 
-
-    <link rel="stylesheet" href="{% static 'css/thames.css' %}?v5">
+    <link rel="stylesheet" href="{% static 'css/thames.css' %}?v={{ WEB_VERSION }}">
 
     <!-- Service Worker -->
     <script>
@@ -254,7 +252,7 @@
     <footer class="bg-light text-center py-4 mt-5">
         <div class="container">
             <p class="mb-1">
-                &copy; {% now "Y" %} {{ SITE_NAME }} Version 2.2
+                &copy; {% now "Y" %} {{ SITE_NAME }} Version {{ WEB_VERSION }}
             </p>
         </div>
     </footer>
@@ -262,7 +260,7 @@
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
-    <script src="{% static 'js/script.js' %}?v12"></script>
+    <script src="{% static 'js/script.js' %}?v={{ WEB_VERSION }}"></script>
     {% block extra_scripts %}
     {% endblock %}
 </body>
