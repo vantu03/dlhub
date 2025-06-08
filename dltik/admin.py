@@ -40,10 +40,10 @@ class TagAdmin(admin.ModelAdmin):
 
 @admin.register(Page)
 class PageAdmin(admin.ModelAdmin):
-    list_display = ("name", "slug", "format", "is_published", "updated_at")
-    search_fields = ("name", "slug", "content")
+    list_display = ("name", "path", "format", "is_published", "updated_at")
+    search_fields = ("name", "path", "content")
     list_filter = ("format", "is_published", "updated_at")
-    prepopulated_fields = {"slug": ("name",)}
+    prepopulated_fields = {"path": ("name",)}
 
 @admin.register(Favorite)
 class FavoriteAdmin(admin.ModelAdmin):

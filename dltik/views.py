@@ -2,7 +2,7 @@ from django.http import JsonResponse
 from django.shortcuts import render
 from .models import Article, User, Upload, PinnedArticle, Page, Favorite, File, MediaAsset
 from dltik import utils
-import json, requests, threading, re
+import json, requests, threading, re, os
 from django.http import StreamingHttpResponse, HttpResponse
 from django.template import Template, Context
 from django.contrib.sitemaps import Sitemap
@@ -18,9 +18,6 @@ from django.utils.http import url_has_allowed_host_and_scheme
 from vt_dlhub import DLHub
 from requests.utils import cookiejar_from_dict
 from django.views.decorators.csrf import csrf_exempt
-
-def ads(request):
-    return render(request, 'dltik/ads.txt')
 
 def custom_404_view(request, exception):
     return render(request, 'dltik/404.html', status=404)
@@ -312,20 +309,8 @@ class ArticleSitemap(Sitemap):
     def lastmod(self, obj):
         return obj.published_at
 
-def robots_txt(request):
-    lines = [
-        "User-agent: *",
-        "Disallow: /admin/",
-        "Disallow: /set-theme/",
-        "Disallow: /user/logout/",
-        "Disallow: / * ?next =",
-        "Allow: /",
-        f"Sitemap: {settings.BASE_URL}/sitemap.xml",
-    ]
-    return HttpResponse("\n".join(lines), content_type="text/plain")
-
-def page_view(request, slug):
-    page = Page.objects.filter(slug=slug).first()
+def page_view(request, path):
+    page = Page.objects.filter(path=path).first()
     if page:
 
         match page.format:
@@ -337,17 +322,30 @@ def page_view(request, slug):
                     'site_name': page.name,
                 })
                 return HttpResponse(template.render(context))
-
             case 'text':
                 return HttpResponse(page.content, content_type='text/plain')
-
             case 'json':
                 try:
                     parsed = json.loads(page.content)
                     return JsonResponse(parsed)
                 except json.JSONDecodeError:
                     return JsonResponse({'error': 'Lỗi json'}, status=400)
-
+            case 'js':
+                return HttpResponse(page.content, content_type='application/javascript')
+            case 'xml':
+                return HttpResponse(page.content, content_type='application/xml')
+            case 'md':
+                return HttpResponse(page.content, content_type='text/markdown')
+            case 'csv':
+                return HttpResponse(page.content, content_type='text/csv')
+            case 'rss':
+                return HttpResponse(page.content, content_type='application/rss+xml')
+            case 'yaml':
+                return HttpResponse(page.content, content_type='application/x-yaml')
+            case 'ini':
+                return HttpResponse(page.content, content_type='text/plain')
+            case 'custom':
+                return HttpResponse(page.content, content_type='text/plain')
             case _:
                 return HttpResponse("Unsupported format", status=415)
     else:

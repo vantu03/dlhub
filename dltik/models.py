@@ -153,16 +153,25 @@ class PinnedArticle(models.Model):
         return f"Ghim: {self.article.title}"
 
 class Page(models.Model):
+
     FORMAT_CHOICES = [
         ('html', 'HTML'),
         ('text', 'Plain Text'),
         ('json', 'JSON'),
+        ('js', 'JavaScript'),
+        ('xml', 'XML'),
+        ('md', 'Markdown'),
+        ('csv', 'CSV'),
+        ('rss', 'RSS'),
+        ('yaml', 'YAML'),
+        ('ini', 'INI'),
+        ('custom', 'Custom Text'),
     ]
 
     name = models.CharField(max_length=200, unique=True)
-    slug = models.SlugField(unique=True)
-    content = models.TextField()
+    path = models.CharField(max_length=255, unique=True)
     format = models.CharField(max_length=10, choices=FORMAT_CHOICES, default='html')
+    content = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     is_published = models.BooleanField(default=True)
@@ -171,16 +180,7 @@ class Page(models.Model):
         ordering = ['-updated_at']
 
     def __str__(self):
-        return f"{self.name} ({self.format})"
-
-    def save(self, *args, **kwargs):
-        import dltik.utils
-        if not self.slug:
-            self.slug = dltik.utils.slugify(self.name)
-        super().save(*args, **kwargs)
-
-    def get_absolute_url(self):
-        return f"/pages/{self.slug}/"
+        return f"{self.name}"
 
 class Favorite(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)

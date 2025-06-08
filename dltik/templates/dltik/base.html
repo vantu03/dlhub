@@ -49,9 +49,8 @@
     <!-- Service Worker -->
     <script>
         if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register("{% static 'service-worker.js' %}?v={{ WEB_VERSION }}", { scope: '/' })
+            navigator.serviceWorker.register("{% static 'service-worker.js' %}?v={{ WEB_VERSION }}")
             .then(function(reg) {
-                console.log("Service Worker registered:", reg);
             })
             .catch(function(err) {
                 console.error("Service Worker registration failed:", err);

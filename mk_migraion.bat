@@ -11,7 +11,7 @@ if exist "venv\" (
 )
 
 REM Open the folder in VS Code
-echo Opening project in Visual Studio Code...
+echo Opening project in PyCharm...
 code .
 
 REM Run Django migrations
