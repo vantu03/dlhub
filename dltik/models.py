@@ -104,13 +104,14 @@ class Article(models.Model):
     show_toc = models.BooleanField(default=True)
     show_meta = models.BooleanField(default=True)
     allow_comments = models.BooleanField(default=True)
-    published_at = models.DateTimeField(default=timezone.now)
+    updated_at = models.DateTimeField(auto_now=True)
+    created_at = models.DateTimeField(default=timezone.now)
     is_published = models.BooleanField(default=True)
     author = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='articles')
     tags = models.ManyToManyField('Tag', blank=True, related_name='articles')
 
     class Meta:
-        ordering = ['-published_at']
+        ordering = ['-created_at']
 
     def __str__(self):
         return self.title

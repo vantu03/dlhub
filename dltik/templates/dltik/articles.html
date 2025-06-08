@@ -47,8 +47,8 @@
                 <p class="text-muted small mb-1" itemprop="description">{{ article.summary }}</p>
                 <small class="text-secondary fst-italic">
                   <i class="bi bi-calendar3 me-1"></i>
-                  <time itemprop="datePublished" datetime="{{ article.published_at|date:'Y-m-d' }}">
-                    {{ article.published_at|date:"d/m/Y" }}
+                  <time itemprop="datePublished" datetime="{{ article.created_at|date:'Y-m-d' }}">
+                    {{ article.created_at|date:"d/m/Y" }}
                   </time>
                 </small>
               </div>

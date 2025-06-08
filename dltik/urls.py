@@ -10,7 +10,13 @@ urlpatterns = [
     path('contact/', views.contact, name='contact'),
     path('article/<slug:slug>/', views.article, name='article'),
     path('articles/tag/<str:tag>/', views.articles, name='tagged_articles'),
-    path('sitemap.xml', sitemap, {'sitemaps': {'static': views.StaticViewSitemap, 'articles': views.ArticleSitemap, }}, name='sitemap'),
+    path('sitemap.xml', sitemap, {
+        'sitemaps': {
+            'static': views.StaticViewSitemap,
+            'pages': views.PageSitemap,
+            'articles': views.ArticleSitemap,
+        }
+    }, name='sitemap'),
     path("user/login/", views.login, name="login"),
     path("user/logout/", views.logout, name="logout"),
     path("user/register/", views.register, name="register"),

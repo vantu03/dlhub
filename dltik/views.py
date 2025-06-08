@@ -195,9 +195,9 @@ def articles(request, tag=None):
     # Sắp xếp theo thời gian
     sort_order = request.GET.get('sort', 'desc')
     if sort_order == 'asc':
-        articles = articles.order_by('published_at')
+        articles = articles.order_by('created_at')
     else:
-        articles = articles.order_by('-published_at')
+        articles = articles.order_by('-created_at')
 
     # Phân trang
     paginator = Paginator(articles, 10)
@@ -307,7 +307,19 @@ class ArticleSitemap(Sitemap):
         return Article.objects.filter(is_published=True)
 
     def lastmod(self, obj):
-        return obj.published_at
+        return obj.created_at
+
+class PageSitemap(Sitemap):
+    protocol = 'https'
+    changefreq = 'monthly'
+    priority = 0.7
+
+    def items(self):
+        return Page.objects.filter(is_published=True)
+
+    def location(self, obj):
+        return f"/{obj.path}"
+
 
 def page_view(request, path):
     page = Page.objects.filter(path=path).first()
