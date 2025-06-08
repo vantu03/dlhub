@@ -307,7 +307,8 @@ class ArticleSitemap(Sitemap):
         return Article.objects.filter(is_published=True)
 
     def lastmod(self, obj):
-        return obj.created_at
+        print(obj.updated_at)
+        return obj.updated_at
 
 class PageSitemap(Sitemap):
     protocol = 'https'
