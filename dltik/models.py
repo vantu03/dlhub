@@ -7,8 +7,9 @@ import os
 from tinymce.models import HTMLField
 from mimetypes import guess_type
 from django.contrib.auth import get_user_model
-User = get_user_model()
+from slugify  import slugify
 
+User = get_user_model()
 
 class Upload(models.Model):
     source_url = models.URLField()
@@ -97,7 +98,7 @@ class MediaAsset(models.Model):
 class Article(models.Model):
     title = models.CharField(max_length=200)
     slug = models.SlugField(unique=True, blank=True)
-    summary = models.CharField(max_length=255, blank=True)
+    description = models.CharField(max_length=255, blank=True)
     content = HTMLField()
     thumbnails = models.ManyToManyField(MediaAsset, related_name='articles')
     views = models.PositiveIntegerField(default=0)
@@ -117,9 +118,8 @@ class Article(models.Model):
         return self.title
 
     def save(self, *args, **kwargs):
-        import dltik.utils
         if not self.slug:
-            self.slug = dltik.utils.slugify(self.title)
+            self.slug = slugify(self.title)
         super().save(*args, **kwargs)
 
     def get_tags(self):

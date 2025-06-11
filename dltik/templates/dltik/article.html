@@ -2,14 +2,14 @@
 {% load static %}
 
 {% block title %}{{ article.title }}{% endblock %}
-{% block description %}{{ article.summary|default:article.content|truncatewords:25|striptags }}{% endblock %}
+{% block description %}{{ article.description|default:article.content|truncatewords:25|striptags }}{% endblock %}
 {% block keywords %}{% for tag in article.get_tags %}{{ tag.name }}{% if not forloop.last %}, {% endif %}{% endfor %}{% endblock %}
 
 {% block og_title %}{{ article.title }}{% endblock %}
-{% block og_description %}{{ article.summary|default:article.content|truncatewords:25|striptags }}{% endblock %}
+{% block og_description %}{{ article.description|default:article.content|truncatewords:25|striptags }}{% endblock %}
 
 {% block twitter_title %}{{ article.title }}{% endblock %}
-{% block twitter_description %}{{ article.summary|default:article.content|truncatewords:25|striptags }}{% endblock %}
+{% block twitter_description %}{{ article.description|default:article.content|truncatewords:25|striptags }}{% endblock %}
 {% if article.thumbnail %}
     {% block og_image %}{{ article.thumbnail }}{% endblock %}
     {% block twitter_image %}{{ article.thumbnail }}{% endblock %}
@@ -21,7 +21,7 @@
       "@context": "https://schema.org",
       "@type": "Article",
       "headline": "{{ article.title|escapejs }}",
-      "description": "{{ article.summary|default:article.content|truncatewords:25|striptags|escapejs }}",
+      "description": "{{ article.description|default:article.content|truncatewords:25|striptags|escapejs }}",
       "image": "{% if article.cover_image %}{{ article.cover_image }}{% else %}{% static 'images/banner.png' %}{% endif %}",
       "author": {
         "@type": "Person",

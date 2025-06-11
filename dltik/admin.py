@@ -22,7 +22,7 @@ class FileAdmin(admin.ModelAdmin):
 class ArticleAdmin(admin.ModelAdmin):
     list_editable = ("is_published",)
     list_display = ("title", "author", "created_at", "is_published", "show_toc")
-    search_fields = ("title", "summary", "tags")
+    search_fields = ("title", "description", "tags")
     list_filter = ("is_published", "created_at")
     prepopulated_fields = {"slug": ("title",)}
     filter_horizontal = ['thumbnails', 'tags']

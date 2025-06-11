@@ -122,33 +122,6 @@ def is_valid_email(email: str):
     except ValidationError:
         return False
 
-def slugify(text):
-    vietnamese_map = {
-        'a': 'áàảãạăắằẳẵặâấầẩẫậ',
-        'A': 'ÁÀẢÃẠĂẮẰẲẴẶÂẤẦẨẪẬ',
-        'd': 'đ',
-        'D': 'Đ',
-        'e': 'éèẻẽẹêếềểễệ',
-        'E': 'ÉÈẺẼẸÊẾỀỂỄỆ',
-        'i': 'íìỉĩị',
-        'I': 'ÍÌỈĨỊ',
-        'o': 'óòỏõọôốồổỗộơớờởỡợ',
-        'O': 'ÓÒỎÕỌÔỐỒỔỖỘƠỚỜỞỠỢ',
-        'u': 'úùủũụưứừửữự',
-        'U': 'ÚÙỦŨỤƯỨỪỬỮỰ',
-        'y': 'ýỳỷỹỵ',
-        'Y': 'ÝỲỶỸỴ'
-    }
-    for non_accented, accented_chars in vietnamese_map.items():
-        for accented_char in accented_chars:
-            text = text.replace(accented_char, non_accented)
-
-    text = text.lower()
-    text = re.sub(r'[^a-z0-9]+', '-', text)  # thay khoảng trắng và ký tự đặc biệt bằng -
-    text = re.sub(r'-{2,}', '-', text)  # gộp nhiều dấu - liền nhau
-    text = text.strip('-')  # xóa dấu - ở đầu/cuối
-    return text
-
 def detect_media_type(info):
     if 'formats' in info and any(f.get('vcodec') not in (None, 'none') for f in info['formats']):
         return 'video'
