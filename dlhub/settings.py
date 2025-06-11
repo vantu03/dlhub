@@ -31,7 +31,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'dltik',
     'django.contrib.sitemaps',
-    'tinymce'
+    'tinymce',
 ]
 
 MIDDLEWARE = [

@@ -22,7 +22,6 @@ urlpatterns = [
     path("user/register/", views.register, name="register"),
     path('tinymce/upload/', views.tinymce_image_upload, name='tinymce_image_upload'),
     path('tools/', views.tools_dashboard, name='tools_dashboard'),
-
     path('<path:path>/', views.page_view, name='page_view'),
 
 ]

@@ -243,3 +243,21 @@ class ScheduledTopic(models.Model):
 
     def __str__(self):
         return f"{self.topic} (expected: {self.scheduled.strftime('%Y-%m-%d %H:%M')})"
+
+class SystemLog(models.Model):
+    class Level(models.TextChoices):
+        INFO = 'info', 'Info'
+        SUCCESS = 'success', 'Success'
+        WARNING = 'warning', 'Warning'
+        ERROR = 'error', 'Error'
+
+    source = models.CharField(max_length=100, blank=True)
+    message = models.TextField()
+    level = models.CharField(max_length=10, choices=Level.choices, default=Level.INFO)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"[{self.level.upper()}] {self.created_at.strftime('%Y-%m-%d %H:%M:%S')} - {self.message[:50]}"

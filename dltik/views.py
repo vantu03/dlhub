@@ -1,6 +1,6 @@
 from django.http import JsonResponse
 from django.shortcuts import render
-from .models import Article, User, Upload, PinnedArticle, Page, Favorite, File, MediaAsset, ScheduledTopic
+from .models import Article, User, Upload, PinnedArticle, Page, Favorite, File, MediaAsset, ScheduledTopic, SystemLog
 from dltik import utils
 import json, requests, threading, re, os
 from django.http import StreamingHttpResponse, HttpResponse
@@ -18,7 +18,7 @@ from django.utils.http import url_has_allowed_host_and_scheme
 from vt_dlhub import DLHub
 from requests.utils import cookiejar_from_dict
 from django.views.decorators.csrf import csrf_exempt
-from dltik.worker import stop_worker, start_worker, is_worker_running, worker_logs, add_log
+from dltik.worker import stop_worker, start_worker, is_worker_running, add_log
 from django.utils.dateparse import parse_datetime
 
 def custom_404_view(request, exception):
@@ -531,7 +531,8 @@ def tools_dashboard(request):
             except Exception as e:
                 add_log(f"Lỗi xử lý JSON: {e}")
 
+    logs = SystemLog.objects.order_by('-created_at')[:100]
     return render(request, 'dltik/tools.html', {
         'worker_running': is_worker_running(),
-        'logs': worker_logs
+        'logs': logs
     })

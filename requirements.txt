@@ -1,10 +1,12 @@
 annotated-types==0.7.0
 anyio==4.9.0
 asgiref==3.8.1
-autowriter-vt @ git+https://github.com/vantu03/autowriter-vt.git@dcd1b8c5a02edfda9da75ef4b504282296d219a9
+autowriter-vt @ git+https://github.com/vantu03/autowriter-vt.git@f2204e3946d07b58c09e1d4d64ab4f700724b5ec
 beautifulsoup4==4.13.4
 certifi==2025.4.26
+channels==4.2.2
 charset-normalizer==3.4.2
+click==8.2.1
 colorama==0.4.6
 distro==1.9.0
 Django==5.2.1
@@ -14,6 +16,7 @@ django-simple-captcha==0.6.2
 django-tinymce==4.1.0
 h11==0.16.0
 httpcore==1.0.9
+httptools==0.6.4
 httpx==0.28.1
 idna==3.10
 jiter==0.10.0
@@ -24,6 +27,8 @@ pydantic==2.11.5
 pydantic_core==2.33.2
 python-dotenv==1.1.0
 python-slugify==8.0.4
+PyYAML==6.0.2
+redis==6.2.0
 requests==2.32.3
 six==1.17.0
 sniffio==1.3.1
@@ -35,6 +40,9 @@ typing-inspection==0.4.1
 typing_extensions==4.13.2
 tzdata==2025.2
 urllib3==2.4.0
+uvicorn==0.34.3
 vt_dlhub @ git+https://github.com/vantu03/vt_dlhub.git@786f7f18da5edf3fe742d060477a918f153b6957
+watchfiles==1.0.5
+websockets==15.0.1
 wheel==0.45.1
 yt-dlp==2025.4.30

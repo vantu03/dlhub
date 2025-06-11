@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Article, Upload, File, PinnedArticle, Tag, Page, Comment, Favorite, MediaAsset, ScheduledTopic
+from .models import Article, Upload, File, PinnedArticle, Tag, Page, Comment, Favorite, MediaAsset, ScheduledTopic, SystemLog
 from django.utils.html import format_html
 
 @admin.register(Upload)
@@ -97,3 +97,12 @@ class ScheduledTopicAdmin(admin.ModelAdmin):
     list_filter = ('is_generated', 'scheduled', 'author')
     search_fields = ('topic', 'author__username')
     readonly_fields = ('created_at',)
+
+@admin.register(SystemLog)
+class SystemLogAdmin(admin.ModelAdmin):
+    list_display = ("created_at", "level", "source", "short_message")
+    list_filter = ("level", "source")
+    search_fields = ("message",)
+
+    def short_message(self, obj):
+        return (obj.message[:60] + "...") if len(obj.message) > 60 else obj.message

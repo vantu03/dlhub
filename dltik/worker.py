@@ -1,21 +1,21 @@
 import threading, time, queue
-from django.conf import settings
 from django.utils import timezone
+from django.db import connection, OperationalError
+from django.conf import settings
+from dltik.flags import FlagManager
 from dltik.models import ScheduledTopic, Article, Tag
 from autowriter import ArticleGenerator
 
-worker_running = False
 worker_thread = None
 task_queue = queue.Queue()
-worker_logs = []
 
 def worker_loop():
-    global worker_running
 
     periodic_interval = 10
     next_periodic = time.time()
 
-    while worker_running:
+    while is_worker_running():
+
         try:
 
             if not task_queue.empty():
@@ -32,8 +32,10 @@ def worker_loop():
         except Exception as e:
             add_log(f"Worker error: {e}")
             time.sleep(10)
+    add_log("Worker stopped", "success")
 
 def periodic_tasks():
+
     pending_topics = ScheduledTopic.objects.filter(is_generated=False, scheduled__lte=timezone.now())
 
     if not pending_topics.exists():
@@ -53,12 +55,10 @@ def periodic_tasks():
                 continue
 
             try:
-                from django.db import connection
                 connection.close()
                 connection.ensure_connection()
             except Exception as e:
-                add_log(f"Lỗi kết nối CSDL: {str(e)}", "error")
-                continue
+                add_log(f"Lỗi kết nối CSDL: {str(e)}")
 
             article = Article.objects.create(
                 title=result.get("title"),
@@ -97,34 +97,44 @@ class Task:
         self.callback(*self.args, **self.kwargs)
 
 def start_worker():
-    global worker_running, worker_thread
-    if not worker_running:
-        worker_running = True
+    global worker_thread
+    if not is_worker_running():
+
+        add_log("Worker thread started.", "success")
+        FlagManager.enable("worker_running")
         worker_thread = threading.Thread(target=worker_loop, daemon=True)
         worker_thread.start()
-        add_log("Worker thread started.", "success")
     else:
         add_log("Worker is already running.", "warning")
 
 def stop_worker():
-    global worker_running
-    if worker_running:
-        worker_running = False
+    if is_worker_running():
         add_log("Worker stopping...", "warning")
+        FlagManager.disable("worker_running")
     else:
         add_log("Worker was not running.", "warning")
 
 def is_worker_running():
-    return worker_running
+    return FlagManager.is_enabled("worker_running")
 
-def add_log(message, level="info", max_pop=1000):
-    log_entry = {
-        "message": message,
-        "level": level,
-        "timestamp": timezone.now().strftime("%Y-%m-%d %H:%M:%S")
-    }
-    print(f"[{level.upper()}] {log_entry['timestamp']}: {message}")
-    worker_logs.append(log_entry)
 
-    if len(worker_logs) > max_pop:
-        worker_logs.pop(0)
+def add_log(message, level="info", source="worker"):
+    timestamp = timezone.now().strftime('%Y-%m-%d %H:%M:%S')
+    print(f"[{level.upper()}] [{source}] {timestamp}: {message}")
+
+    try:
+
+        from dltik.models import ScheduledTopic, Article, Tag, SystemLog
+
+        connection.close()
+        connection.ensure_connection()
+
+        SystemLog.objects.create(
+            message=message,
+            level=level,
+            source=source
+        )
+    except OperationalError as e:
+        print(f"[ERROR] [log-fail] DB error while logging: {e}")
+    except Exception as e:
+        print(f"[ERROR] [log-fail] Unknown error while logging: {e}")
