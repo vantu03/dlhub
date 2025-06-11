@@ -12,6 +12,8 @@ DEBUG = os.getenv("DEBUG", "False") == "True"
 
 BASE_URL = os.getenv("BASE_URL", "http://localhost:8000")
 
+WORKER_DELAY = os.getenv("WORKER_DELAY", 1)
+
 WEB_VERSION = os.getenv("WEB_VERSION", "1.0.0")
 
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")

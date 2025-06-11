@@ -1,6 +1,6 @@
 from django.http import JsonResponse
 from django.shortcuts import render
-from .models import Article, User, Upload, PinnedArticle, Page, Favorite, File, MediaAsset
+from .models import Article, User, Upload, PinnedArticle, Page, Favorite, File, MediaAsset, ScheduledTopic
 from dltik import utils
 import json, requests, threading, re, os
 from django.http import StreamingHttpResponse, HttpResponse
@@ -18,6 +18,8 @@ from django.utils.http import url_has_allowed_host_and_scheme
 from vt_dlhub import DLHub
 from requests.utils import cookiejar_from_dict
 from django.views.decorators.csrf import csrf_exempt
+from dltik.worker import stop_worker, start_worker, is_worker_running, worker_logs, add_log
+from django.utils.dateparse import parse_datetime
 
 def custom_404_view(request, exception):
     return render(request, 'dltik/404.html', status=404)
@@ -498,3 +500,38 @@ def tinymce_image_upload(request):
         return JsonResponse({'location': asset.url})
 
     return JsonResponse({'error': 'Không hợp lệ'}, status=400)
+
+def tools_dashboard(request):
+    if not request.user.is_authenticated or not request.user.is_superuser:
+        return redirect('home')
+
+    if request.method == "POST":
+        if 'start' in request.POST:
+            start_worker()
+        elif 'stop' in request.POST:
+            stop_worker()
+        elif "add_json" in request.POST:
+
+            try:
+                data = json.loads(request.POST.get("json_input", "[]"))
+                count = 0
+                for entry in data:
+                    topic = entry.get("topic", "").strip()
+                    scheduled = parse_datetime(entry.get("scheduled", ""))
+                    if topic and scheduled:
+                        ScheduledTopic.objects.get_or_create(
+                            topic=topic,
+                            defaults={
+                                "scheduled": scheduled,
+                                "author": request.user
+                            }
+                        )
+                        count += 1
+                add_log(f"Đã thêm {count} topic từ JSON vào danh sách đợi.")
+            except Exception as e:
+                add_log(f"Lỗi xử lý JSON: {e}")
+
+    return render(request, 'dltik/tools.html', {
+        'worker_running': is_worker_running(),
+        'logs': worker_logs
+    })

@@ -1,0 +1,158 @@
+{% extends "dltik/base.html" %}
+{% load static %}
+
+{% block title %}Trang Công Cụ{% endblock %}
+{% block description %}Các công cụ nền dành cho quản trị viên{% endblock %}
+{% block keywords %}công cụ, quản trị, hệ thống, DLHub{% endblock %}
+
+{% block extra_head %}
+    <meta name="robots" content="noindex, follow">
+{% endblock %}
+{% block content %}
+<article class="bg-white rounded shadow-sm p-4">
+    <header class="mb-4">
+        <h1 class="fw-bold text-primary">
+            <i class="bi bi-tools me-2"></i> Công cụ quản trị
+        </h1>
+    </header>
+
+    <p class="text-muted border-top"></p>
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-3">
+
+        <!-- Worker nền -->
+        <div class="col">
+            <div class="card h-100 border-warning shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title text-warning">
+                        <i class="bi bi-cpu-fill me-2"></i> Trạng thái Worker
+                    </h5>
+                    <p class="card-text">Bắt đầu hoặc dừng thread nền xử lý các tác vụ lặp như kiểm tra lịch hẹn.</p>
+                    <form method="post" class="d-flex gap-2 mt-2">
+                        {% csrf_token %}
+                        {% if worker_running %}
+                            <button type="submit" name="stop" class="btn btn-sm btn-danger">
+                                <i class="bi bi-stop-fill"></i> Dừng
+                            </button>
+                        {% else %}
+                            <button type="submit" name="start" class="btn btn-sm btn-success">
+                                <i class="bi bi-play-fill"></i> Bắt đầu
+                            </button>
+                        {% endif %}
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Lên lịch bài viết -->
+        <div class="col">
+            <div class="card h-100 border-primary shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title text-primary">
+                        <i class="bi bi-chat-dots-fill me-2"></i> Lên lịch tạo bài viết tự đọng
+                    </h5>
+                    <p class="card-text">Khi nhập dữ liệu vào sẽ tự động sinh ra bài viết nhờ ChatGPT-4o.</p>
+
+                    <button class="btn btn-primary btn-sm" type="button" data-bs-toggle="modal" data-bs-target="#jsonModal">
+                        <i class="bi bi-code-slash"></i> Lên lịch
+                    </button>
+
+                    <div class="modal fade" id="jsonModal" tabindex="-1" aria-labelledby="jsonModalLabel" aria-hidden="true">
+                        <div class="modal-dialog modal-lg modal-dialog-scrollable">
+                            <div class="modal-content">
+                                <form method="post">
+                                    {% csrf_token %}
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" id="jsonModalLabel">
+                                            <i class="bi bi-code-slash me-2"></i> Nhập JSON cho lịch AI
+                                        </h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <textarea id="json_input" name="json_input" style="display:none;">{{ json_input|default:"" }}</textarea>
+                                        <div id="editor" class="form-control" style="height: 300px; font-family: monospace;"></div>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="submit" name="add_json" class="btn btn-primary">
+                                            <i class="bi bi-send"></i> Đẩy vào lịch
+                                        </button>
+                                        <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Hủy</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Cấu hình hệ thống -->
+        <div class="col">
+            <div class="card h-100 border-success shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title text-success">
+                        <i class="bi bi-sliders me-2"></i> Cấu hình hệ thống
+                    </h5>
+                    <p class="card-text">Tùy chỉnh cài đặt toàn trang: hiển thị, bảo mật, thời gian xử lý.</p>
+                    <a href="#" class="btn btn-outline-success btn-sm">
+                        <i class="bi bi-gear"></i> Cài đặt
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <h3 class="mt-4"><i class="bi bi-terminal me-1"></i> Logs</h3>
+    <div class="border rounded shadow-sm mb-3" style="max-height: 200px; overflow-y: auto;">
+        <ul class="list-group list-group-flush small">
+            {% for log in logs|dictsortreversed:"timestamp" %}
+                <li class="list-group-item d-flex justify-content-between align-items-start">
+                    <span class="me-3">
+                        {% if log.level == 'success' %}
+                            <i class="bi bi-check-circle-fill text-success me-1"></i>
+                        {% elif log.level == 'error' %}
+                            <i class="bi bi-x-circle-fill text-danger me-1"></i>
+                        {% elif log.level == 'warning' %}
+                            <i class="bi bi-exclamation-triangle-fill text-warning me-1"></i>
+                        {% else %}
+                            <i class="bi bi-info-circle-fill text-secondary me-1"></i>
+                        {% endif %}
+                        {{ log.message }}
+                    </span>
+                    <small class="text-muted text-nowrap">{{ log.timestamp }}</small>
+                </li>
+            {% empty %}
+                <li class="list-group-item">Không có log nào.</li>
+            {% endfor %}
+        </ul>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.14/codemirror.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.14/mode/javascript/javascript.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.14/codemirror.min.css"/>
+    <script>
+        let editor;
+
+        document.addEventListener("DOMContentLoaded", function () {
+            const textarea = document.getElementById("json_input");
+            editor = CodeMirror(document.getElementById("editor"), {
+                mode: { name: "javascript", json: true },
+                lineNumbers: true,
+                theme: "default",
+                value: textarea.value
+            });
+
+            // Khi submit form, đồng bộ lại nội dung
+            document.querySelector('#jsonModal form').addEventListener('submit', function () {
+                textarea.value = editor.getValue();
+            });
+
+            // Gọi refresh khi modal mở lần đầu
+            const modal = document.getElementById('jsonModal');
+            modal.addEventListener('shown.bs.modal', function () {
+                editor.refresh();
+            });
+        });
+    </script>
+
+</article>
+{% endblock %}

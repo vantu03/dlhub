@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Article, Upload, File, PinnedArticle, Tag, Page, Comment, Favorite, MediaAsset
+from .models import Article, Upload, File, PinnedArticle, Tag, Page, Comment, Favorite, MediaAsset, ScheduledTopic
 from django.utils.html import format_html
 
 @admin.register(Upload)
@@ -90,3 +90,10 @@ class MediaAssetAdmin(admin.ModelAdmin):
         return "Không hiển thị"
 
     preview.short_description = "Xem trước"
+
+@admin.register(ScheduledTopic)
+class ScheduledTopicAdmin(admin.ModelAdmin):
+    list_display = ('topic', 'scheduled', 'author', 'is_generated', 'created_at')
+    list_filter = ('is_generated', 'scheduled', 'author')
+    search_fields = ('topic', 'author__username')
+    readonly_fields = ('created_at',)

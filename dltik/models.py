@@ -230,3 +230,16 @@ class Comment(models.Model):
         self.reject_reason = reason
         self.moderated_at = timezone.now()
         self.save()
+
+class ScheduledTopic(models.Model):
+    topic = models.CharField(max_length=255, unique=True)
+    scheduled = models.DateTimeField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    is_generated = models.BooleanField(default=False)
+    author = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
+
+    class Meta:
+        ordering = ['-scheduled']
+
+    def __str__(self):
+        return f"{self.topic} (expected: {self.scheduled.strftime('%Y-%m-%d %H:%M')})"
