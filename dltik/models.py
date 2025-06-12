@@ -100,7 +100,11 @@ class Article(models.Model):
     slug = models.SlugField(unique=True, blank=True)
     description = models.CharField(max_length=255, blank=True)
     content = HTMLField()
-    thumbnails = models.ManyToManyField(MediaAsset, related_name='articles')
+    thumbnails = models.ManyToManyField(
+        MediaAsset,
+        related_name='articles',
+        blank=True,
+    )
     views = models.PositiveIntegerField(default=0)
     show_toc = models.BooleanField(default=True)
     show_meta = models.BooleanField(default=True)
