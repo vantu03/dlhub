@@ -20,7 +20,7 @@ class FileAdmin(admin.ModelAdmin):
 
 @admin.register(Article)
 class ArticleAdmin(admin.ModelAdmin):
-    list_editable = ("is_published",)
+    list_editable = ("is_published", "show_toc")
     list_display = ("title", "author", "created_at", "is_published", "show_toc")
     search_fields = ("title", "description", "tags")
     list_filter = ("is_published", "created_at")
@@ -93,6 +93,7 @@ class MediaAssetAdmin(admin.ModelAdmin):
 
 @admin.register(ScheduledTopic)
 class ScheduledTopicAdmin(admin.ModelAdmin):
+    list_editable = ("is_generated",)
     list_display = ('topic', 'scheduled', 'author', 'is_generated', 'created_at')
     list_filter = ('is_generated', 'scheduled', 'author')
     search_fields = ('topic', 'author__username')
