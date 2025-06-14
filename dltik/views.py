@@ -100,18 +100,19 @@ def perform(request):
                             # Xác định loại file
                             label = "Download"
 
-                            if width >= 7680 and height >= 4320:
-                                label = " <i class='bi bi-badge-8k'></i>"
-                            elif width >= 3840 and height >= 2160:
-                                label = " <i class='bi bi-badge-4k'></i>"
-                            elif width >= 2560 and height >= 1440:
-                                label = " <i class='bi bi-badge-4k'></i>"
-                            elif width >= 1920 and height >= 1080:
-                                label = " <i class='bi bi-badge-hd'></i>"
-                            elif width >= 1280 and height >= 720:
-                                label = " <i class='bi bi-badge-hd'></i>"
-                            elif width >= 854 and height >= 480:
-                                label = " <i class='bi bi-badge-sd'></i>"
+                            effective_width = max(width, height)
+                            if effective_width >= 7680:
+                                label += " <i class='bi bi-badge-8k'></i>"
+                            elif effective_width >= 3840:
+                                label += " <i class='bi bi-badge-4k'></i>"
+                            elif effective_width >= 2560:
+                                label += " <i class='bi bi-badge-2k'></i>"
+                            elif effective_width >= 1920:
+                                label += " <i class='bi bi-badge-hd'></i>"
+                            elif effective_width >= 1280:
+                                label += " <i class='bi bi-badge-hd'></i>"
+                            elif effective_width >= 854:
+                                label += " <i class='bi bi-badge-sd'></i>"
 
                             if fmt.get('vcodec') == 'none' and fmt.get('acodec') != 'none':
                                 label += ' <i class="bi bi-bell-slash"></i>'
