@@ -2,7 +2,7 @@ from django.http import JsonResponse
 from django.shortcuts import render
 from .models import Article, User, Upload, PinnedArticle, Page, Favorite, File, MediaAsset, ScheduledTopic, SystemLog
 from dltik import utils
-import json, requests, threading, re, os
+import json, requests, re
 from django.http import StreamingHttpResponse, HttpResponse
 from django.template import Template, Context
 from django.contrib.sitemaps import Sitemap
@@ -15,11 +15,12 @@ from django.contrib.auth import authenticate, login as auth_login, logout as aut
 from django.conf import settings
 from urllib.parse import quote
 from django.utils.http import url_has_allowed_host_and_scheme
-from vt_dlhub import DLHub
 from requests.utils import cookiejar_from_dict
 from django.views.decorators.csrf import csrf_exempt
 from dltik.worker import stop_worker, start_worker, is_worker_running, add_log
 from django.utils.dateparse import parse_datetime
+from yt_dlp import YoutubeDL
+from tikimg import TikTokExtractor
 
 def custom_404_view(request, exception):
     return render(request, 'dltik/404.html', status=404)
@@ -50,64 +51,82 @@ def perform(request):
                     type1 = decoded.get('decoded', {}).get('type1')
                     if video_url:
 
-                        formats = []
-                        threads = []
-
-                        if type1 == 0:
-                            dl = DLHub(video_url)
-                            info = dl.run(download=False)
-                            info["thumbnail"] = info.get('cover', '')
-
+                        tikimg = TikTokExtractor(video_url)
+                        info = tikimg.extract()
+                        if info:
+                            formats = []
+                            for url in info.get('photos', []):
+                                formats.append({
+                                    'url': url,
+                                    'height': 10,
+                                    'ext': 'jpg'
+                                })
                         else:
-
-                            info = utils.get_formats(video_url)
-                            info["final_url"] = info.get('url', '')
-
-                            formats = [
-                                ("Download <i class='bi bi-badge-hd-fill'></i>", 'best', False),
-                                ("Download", 'best[height<=720]', False),
-                            ]
-
-                            for fmt in info.get('formats', []):
-                                if "hd" in fmt['format_id'] and False:
-                                    formats["Download "+ fmt['format_id']] = fmt['format_id']
-                                print(f"{fmt['format_id']} - {fmt.get('height')}")
+                            with YoutubeDL({
+                                'format': 'bestvideo+bestaudio/best',
+                                'noplaylist': True
+                            }) as ydl:
+                                info = ydl.extract_info(video_url, download=False)
+                                formats = sorted(
+                                    info['formats'],
+                                    key=lambda f: (
+                                        f.get('height') or -1,
+                                        f.get('filesize') or f.get('filesize_approx') or -1,
+                                    ),
+                                    reverse=True
+                                )
 
                         upload = Upload.objects.create(
                             source_url=video_url,
-                            final_url=info.get('final_url', ''),
-                            title=info.get('title', ''),
+                            final_url=video_url,
+                            title=info.get('title', 'Không có').strip()[:255],
                             thumbnail=info.get('thumbnail', ''),
                         )
 
-                        for i, item in enumerate(info.get("media", []), start=1):
-                            if item['type'] == 'video':
-                                label = "Download <i class='bi bi-badge-hd-fill'></i>"
-                            elif item['type'] == 'music':
-                                label = "Download <i class='bi bi-music-note-beamed'></i>"
-                            elif item['type'] == 'image':
-                                label = f"Ảnh {i}"
-                            else:
-                                label = "Download"
+                        used_labels = set()
+
+                        for i, fmt in enumerate(formats):
+
+                            if not fmt.get('url') or not fmt.get('height'):
+                                continue
+
+                            height = fmt.get('height', 0)
+                            filesize = fmt.get('filesize', fmt.get('filesize_approx'))
+
+                            if not filesize and height == 0:
+                                continue
+
+                            # Xác định loại file
+                            label = "Download"
+
+                            if height >= 2160:
+                                label += ' <i class="bi bi-badge-8k"></i>'
+                            elif height >= 1440:
+                                label += ' <i class="bi bi-badge-4k"></i>'
+                            elif height >= 720:
+                                label += ' <i class="bi bi-badge-hd"></i>'
+                            elif height >= 480:
+                                label += ' <i class="bi bi-badge-sd"></i>'
+
+                            if fmt.get('vcodec') == 'none' and fmt.get('acodec') != 'none':
+                                label += ' <i class="bi bi-bell-slash"></i>'
+
+                            if filesize and filesize > 0:
+                                size_mb = filesize / (1024 * 1024)
+                                label += f" {size_mb:.1f} MB"
+
+                            if label in used_labels and fmt.get('ext') != 'jpg':
+                                continue
+                            used_labels.add(label)
 
                             upload.files.create(
                                 label=label,
-                                url=item["url"],
-                                filename=item['filename'],
-                                type=item['type'],
-                                cookies=item.get('cookies', {})
+                                url=fmt.get('url'),
+                                filename=f"{i}_{info.get('id')}.{fmt.get('ext', 'mp4')}",
+                                type= 'video' if fmt.get('video_ext') else 'audio' if fmt.get('audio_ext') else 'image',
+                                headers=fmt.get('http_headers', {}),
+                                cookies=utils.parse_cookie_string(fmt.get('cookies', ''))
                             )
-
-                        for label, fmt, save in formats:
-                            t = threading.Thread(
-                                target=utils.download_format,
-                                args=(label, fmt, video_url, upload, save, request)
-                            )
-                            t.start()
-                            threads.append(t)
-
-                        for t in threads:
-                            t.join()
 
                         data = {
                             'title': upload.title,
@@ -124,13 +143,13 @@ def perform(request):
                         utils.encode_data(data)
 
                         user_agent = request.META.get('HTTP_USER_AGENT', '')
-                        #if 'iPhone' in user_agent or 'iPad' in user_agent:
-                        data['urls'].append({
-                            'label': '<img src="https://help.apple.com/assets/6712D663A5C9C17B38070C34/6712D668A5C9C17B38070C3A/en_US/d230a25cb974f8908871af04caad89a1.png" alt="iOS Shortcut" style="width: 24px; height: 24px;">Thêm phím tắt',
-                            'type': 'url',
-                            'className': 'btn btn-dark w-100 d-flex gap-2 mb-2',
-                            'url': 'https://www.icloud.com/shortcuts/fa4a84c9d17d495f99ba9e8675b8a0f7'
-                        })
+                        if 'iPhone' in user_agent or 'iPad' in user_agent:
+                            data['urls'].append({
+                                'label': '<img src="https://help.apple.com/assets/6712D663A5C9C17B38070C34/6712D668A5C9C17B38070C3A/en_US/d230a25cb974f8908871af04caad89a1.png" alt="iOS Shortcut" style="width: 24px; height: 24px;">Thêm phím tắt',
+                                'type': 'url',
+                                'className': 'btn btn-dark w-100 d-flex gap-2 mb-2',
+                                'url': 'https://www.icloud.com/shortcuts/fa4a84c9d17d495f99ba9e8675b8a0f7'
+                            })
 
                         data['urls'].append({
                             'label': '<i class="bi bi-plus-circle"></i> Tải video khác',
@@ -152,10 +171,7 @@ def perform(request):
                             file.downloads = file.downloads + 1
                             file.save()
                         try:
-                            r = requests.get(real_url, headers={
-                                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
-                                'Accept-Language': 'en-US,en;q=0.9',
-                            }, cookies=file.cookies, stream=True, timeout=10)
+                            r = requests.get(real_url, headers=file.headers, cookies=file.cookies, stream=True, timeout=10)
                             r.raise_for_status()
                         except requests.RequestException:
                             return JsonResponse({'error': 'Không thể tải video từ URL'}, status=400)

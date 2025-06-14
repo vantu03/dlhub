@@ -16,7 +16,7 @@ class Upload(models.Model):
     final_url = models.URLField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     title = models.CharField(max_length=255)
-    thumbnail = models.URLField(blank=True, null=True)
+    thumbnail = models.URLField(max_length=3000, blank=True, null=True)
 
     def __str__(self):
         return f"Upload: {self.title}"
@@ -34,8 +34,9 @@ class File(models.Model):
     upload = models.ForeignKey(Upload, related_name='files', on_delete=models.CASCADE)
     url = models.URLField(max_length=2000)
     type = models.CharField(max_length=10, choices=Type.choices)
-    label = models.CharField(max_length=100)
+    label = models.CharField(max_length=255)
     filename = models.CharField(max_length=255, blank=True)
+    headers = models.JSONField(blank=True, null=True)
     cookies = models.JSONField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     downloads = models.IntegerField(default=0)

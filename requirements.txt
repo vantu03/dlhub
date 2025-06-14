@@ -1,7 +1,7 @@
 annotated-types==0.7.0
 anyio==4.9.0
 asgiref==3.8.1
-autowriter-vt @ git+https://github.com/vantu03/autowriter-vt.git@555f50fe33027d818deb616620aaa4aa8921fdae
+autowriter-vt @ git+https://github.com/vantu03/autowriter-vt.git@354fc0c24b4446d4a879e88ab9c685f4994f0d9f
 beautifulsoup4==4.13.4
 certifi==2025.4.26
 channels==4.2.2
@@ -46,3 +46,4 @@ watchfiles==1.0.5
 websockets==15.0.1
 wheel==0.45.1
 yt-dlp==2025.4.30
+tiktokphoto==1.2.0

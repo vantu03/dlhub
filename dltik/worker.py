@@ -59,6 +59,8 @@ def periodic_tasks():
                 connection.ensure_connection()
             except Exception as e:
                 add_log(f"Lỗi kết nối CSDL: {str(e)}")
+                
+            print(result.get("slug"))
 
             article = Article.objects.create(
                 title=result.get("title"),

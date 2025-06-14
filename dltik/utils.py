@@ -41,57 +41,11 @@ def decode_token(encoded_token):
 
 def parse_cookie_string(cookie_str):
     cookies = {}
-    for pair in cookie_str.split(';'):
-        if '=' in pair:
-            key, value = pair.strip().split('=', 1)
-            cookies[key] = value
+    for cookie in cookie_str.split('; '):
+        if '=' in cookie:
+            k, v = cookie.split('=', 1)
+            cookies[k.strip()] = v.strip().strip('"')
     return cookies
-
-def download_format(label, fmt, video_url, upload, save, request):
-    try:
-        filename = f"dlhub_{uuid.uuid4()}"
-        filepath = str(settings.BASE_DIR / 'media' / 'videos' / f'{filename}')
-
-        with yt_dlp.YoutubeDL({
-            'outtmpl': f'{filepath}.%(ext)s',
-            'format': fmt,
-            'quiet': True,
-            'noplaylist': True,
-            'continuedl': False,
-            'http_headers': {
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
-                'Accept-Language': 'en-US,en;q=0.9',
-            }
-        }) as ydl:
-            info = ydl.extract_info(video_url, download=save)
-            ext = info.get('ext', 'mp4')
-
-            if save:
-                path = f"{settings.BASE_URL}/media/videos/{filename}.{ext}"
-            else:
-                path = info.get('url', '')
-
-            upload.files.create(label=label, url=path, filename=f"{filename}.{ext}", type='video', cookies=parse_cookie_string(info.get("cookies", '')),)
-
-
-    except Exception as e:
-        print(f"[Download Thread Error] {label}: {e}")
-
-def get_formats(url):
-    ydl_opts = {
-        'quiet': True,
-        'skip_download': True,
-        'continuedl': False,
-        'noplaylist': True,
-        'http_headers': {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
-            'Accept-Language': 'en-US,en;q=0.9',
-        }
-    }
-
-    with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-        info = ydl.extract_info(url, download=False)
-        return info
 
 def encode_data(data):
     new_urls = []

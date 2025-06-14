@@ -202,7 +202,7 @@ function downloadVideo(encoded) {
                     btn.className = "btn btn-primary w-100 d-flex gap-2 mb-2";
                     btn.innerHTML = `<i class="bi bi-download"></i>${item.label}`;
                     buttons.appendChild(btn);
-                } else if (item.type === "music") {
+                } else if (item.type === "audio") {
 
                     const btn = document.createElement("a");
                     const url = new URL(item.url, window.location.origin);
