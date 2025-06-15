@@ -79,7 +79,7 @@ def perform(request):
                         upload = Upload.objects.create(
                             source_url=video_url,
                             final_url=video_url,
-                            title=info.get('title', 'Không có').strip()[:255],
+                            title=info.get('title', '...').strip()[:50],
                             thumbnail=info.get('thumbnail', ''),
                         )
 
